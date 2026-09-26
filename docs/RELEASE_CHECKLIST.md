@@ -1,6 +1,7 @@
 # Release checklist — v1.0.0
 
-State on 2026-09-25. "Verified locally" means run on the development laptop (Apple M1). Remote CI
+State at the v1.0.0 release. "Verified locally" means run on the development laptop (Apple M1).
+Remote CI passed on GitHub Actions for the release commit (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126). Previously: remote CI
 has **not** run and nothing has been pushed or published.
 
 ## Release blockers
@@ -8,7 +9,7 @@ has **not** run and nothing has been pushed or published.
 | Blocker | Status |
 |---|---|
 | Fresh setup must not depend on local databases, caches, registry version numbers or untracked artifacts | **Done.** Active bundle committed in `releases/active/`; `make setup` registers by identity. Verified from a clean `git clone` with isolated services (registered as `fraud-risk-f1/1`, served correctly). |
-| CI must provide every service the tests need, with explicit test-container targeting | **Done locally.** PostgreSQL, Redis, Kafka services, readiness step, timeouts; outage tests pause `FRAUD_TEST_REDIS_CONTAINER`. Local runs on disposable isolated services: 167 unit + 75 integration tests passed. **Remote run pending.** |
+| CI must provide every service the tests need, with explicit test-container targeting | **Done locally.** PostgreSQL, Redis, Kafka services, readiness step, timeouts; outage tests pause `FRAUD_TEST_REDIS_CONTAINER`. Local runs on disposable isolated services: 167 unit + 75 integration tests passed. **Remote CI passed** ([run](https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126)). |
 | Documented recovery path must work (`make down`/`up` → `make dashboard-reset`) | **Done** (bug fixed and regression-tested). |
 | No credentials, session material, account files or private runtime logs in the published files | **Prepared.** The private history (author metadata, historical `mlflow.db`) stays private; publication uses a sanitized snapshot without `.git` (`scripts/build_publication_copy.py`) that passes `scripts/privacy_check.py`. |
 | License and provenance | **Prepared, holder undecided:** MIT scoped to the original code; the public copy's copyright holder is a placeholder until you choose one; `THIRD_PARTY_NOTICES.md` records what was consulted, adapted (simulator design and example parameters, one short attributed quote) and written independently. Needs your confirmation. |
@@ -38,16 +39,13 @@ has **not** run and nothing has been pushed or published.
 * System sleep pauses the stack; keep the machine awake for demonstrations.
 * Confirmed labels are not connected to the console; dispositions are not labels.
 
-## Publication sequence (after approval)
+## Publication (done)
 
-1. Create the public repository under the account chosen for publication and push `main` (no tag yet).
-2. Run the real remote CI; fix any failure and push until CI passes on the intended release commit.
-3. Check the rendered README, screenshots and setup/installation links on GitHub.
-4. Only then tag that commit `v1.0.0` and create the GitHub release from `docs/RELEASE_NOTES.md`,
-   uploading `media/fraud-platform-demo.webm` (git-ignored, so it is attached to the release,
-   not committed).
-5. Add a prominent README link to the uploaded release asset in a docs-only commit, and confirm CI
-   passes on it. Until then the README does not reference the video.
+Published as a sanitized snapshot (see `PROVENANCE.md`): repository created and `main` pushed; the
+first CI run failed because the workflow used the `job` context in job-level `env` (not allowed);
+fixed by moving it to step `env`, after which CI passed (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126). README, screenshots and links
+were checked on GitHub; the passing commit was tagged `v1.0.0` and released (https://github.com/Rizzzyyy1/fraud-platform/releases/tag/v1.0.0) with the demo
+video attached, and the README links to it.
 
 ## Original requirements still deferred
 

@@ -1,8 +1,9 @@
 # Progress
 
-**CI:** `.github/workflows/ci.yml` is configured (lint, types, unit and integration tests with
-PostgreSQL and Redis service containers) but has not been executed remotely; the repository has
-not been pushed. All results below are from local runs.
+**CI:** `.github/workflows/ci.yml` runs lint, types, documentation links, unit tests, integration
+tests on PostgreSQL, Redis and Kafka service containers, and the dashboard checks. It passed on
+GitHub Actions for the v1.0.0 release commit (see *Publication* at the end); results in the
+earlier sections are from local runs.
 
 Status legend: **implemented + tested** · **planned** · *optional*.
 
@@ -561,3 +562,12 @@ Driven by an independent local audit. No models, policies, thresholds or held-ou
 ## Known issues
 
 * Port 8000 is used by another local process; the API serves on 8100.
+
+## Publication (v1.0.0)
+
+Published as a sanitized snapshot of the private development repository with fresh history
+(`PROVENANCE.md`). The first remote CI run failed on a workflow error (`job` context used in
+job-level `env`); after moving it to step `env`, GitHub Actions passed: 167 unit and 75
+integration tests on PostgreSQL, Redis and Kafka services, 14 dashboard tests and the production
+build (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126). Release: https://github.com/Rizzzyyy1/fraud-platform/releases/tag/v1.0.0 (demo video attached).
+

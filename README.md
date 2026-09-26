@@ -7,6 +7,8 @@ in a React console. A portfolio project; everything runs on one laptop at no cos
 
 ![Investigation view: decision summary with the policy rule applied, lifecycle from transaction to published event, stored model and policy identities](docs/screenshots/04-investigation-detail.png)
 
+**▶ [Watch the demo video (4 min 21 s, real time, captioned)](https://github.com/Rizzzyyy1/fraud-platform/releases/download/v1.0.0/fraud-platform-demo.webm)** · [Release v1.0.0](https://github.com/Rizzzyyy1/fraud-platform/releases/tag/v1.0.0)
+
 <sub>Investigation view of a real decision from the local deployment. More:
 [live activity](docs/screenshots/02-live-activity.png) ·
 [failure drill](docs/screenshots/11-drill-scoring-suppressed.png) ·
@@ -65,7 +67,7 @@ make dashboard                        # open http://127.0.0.1:8200
 * **Sustained latency is inconsistent** on this machine; the project does not claim reliable
   100 rps.
 * Local deployment only (single machine, one API process, local HTTP, in-memory console
-  sessions); remote CI is configured but **not yet executed**.
+  sessions). Remote CI [passes](https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126) on GitHub Actions for the v1.0.0 release commit.
 * Analyst dispositions are not labels and are not used for training; confirmed labels are not
   connected to the console. Full list: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md).
 

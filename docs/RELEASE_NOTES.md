@@ -52,5 +52,6 @@ local HTTP with in-memory sessions; confirmed labels not connected to the consol
 
 ## Verification status
 
-Verified locally (unit, integration, dashboard tests; CI-like runs; clean-clone setup; browser
-walkthrough). Remote CI: pending first run at publication.
+Verified locally (unit, integration, dashboard tests; clean-copy setup; browser walkthrough) and
+on GitHub Actions for the release commit: 167 unit and 75 integration tests (PostgreSQL, Redis,
+Kafka services), 14 dashboard tests and the production build (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126).
