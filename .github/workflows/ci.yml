@@ -55,8 +55,6 @@ jobs:
       FRAUD_TEST_DATABASE_URL: postgresql://fraud:ci-only@127.0.0.1:5433/fraud_test
       FRAUD_TEST_REDIS_URL: redis://127.0.0.1:6380/15
       FRAUD_TEST_KAFKA_BOOTSTRAP: 127.0.0.1:9094
-      # Redis-outage tests pause this container (`docker pause`); it is the service container.
-      FRAUD_TEST_REDIS_CONTAINER: ${{ job.services.redis.id }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -75,6 +73,10 @@ jobs:
         run: uv run python scripts/wait_for_services.py --timeout 240
       - name: Integration tests (PostgreSQL, Redis, Kafka; MLflow uses a temporary SQLite store)
         timeout-minutes: 15
+        env:
+          # Redis-outage tests pause this container (`docker pause`); it is the service container.
+          # The `job` context is available in step env, not in job-level env.
+          FRAUD_TEST_REDIS_CONTAINER: ${{ job.services.redis.id }}
         run: uv run pytest -m integration
 
   dashboard:
