@@ -1,4 +1,4 @@
-.PHONY: env install up down migrate serve test test-integration lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down smoke docs-check
+.PHONY: env install up down migrate serve test test-integration test-redis-recover lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down smoke docs-check ulb-fetch ulb-fetch-openml ulb-reproduce ulb-mlflow ulb-report
 
 env:            ## create .env from the example (local development only)
 	@test -f .env || cp .env.example .env
@@ -31,9 +31,27 @@ test-integration: ## integration tests on disposable isolated services (never th
 	  uv run python scripts/wait_for_services.py --timeout 180
 	$(ITEST_ENV) FRAUD_TEST_REDIS_CONTAINER=$$($(ITEST) ps -q redis) uv run pytest -m integration
 
+test-redis-recover: ## unpause the disposable test Redis after an interrupted run (verified test container only)
+	$(ITEST_ENV) FRAUD_TEST_REDIS_CONTAINER=$$($(ITEST) ps -aq redis) uv run python -m tests.safety recover-redis
+
 smoke:          ## browser smoke test: real console + built dashboard on a seeded disposable database (no streaming)
 	$(ITEST) up -d --wait postgres
 	uv run python scripts/browser_smoke.py --admin-url postgresql://fraud:itest-only@127.0.0.1:5543/postgres
+
+ulb-fetch:      ## download and verify the ULB data from the owner-listed Kaggle source (not committed)
+	uv run python -m fraudplat.external.ulb fetch --source kaggle
+
+ulb-fetch-openml: ## the OpenML 1597 v1 copy the original benchmark used (identical data rows)
+	uv run python -m fraudplat.external.ulb fetch --source openml
+
+ulb-report:     ## re-render the ULB benchmark report from its committed JSON (no recomputation)
+	uv run python -m fraudplat.external.report
+
+ulb-reproduce:  ## rerun the frozen ULB protocol; artifacts to git-ignored artifacts/ (reference kept)
+	uv run python -m fraudplat.external.reproduce
+
+ulb-mlflow:     ## record the ULB benchmark in MLflow as an imported historical run (idempotent)
+	set -a; . ./.env; set +a; uv run python -m fraudplat.external.mlflow_import
 
 docs-check:     ## documentation links and evidence consistency
 	uv run python scripts/check_doc_links.py

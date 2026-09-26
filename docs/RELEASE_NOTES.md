@@ -1,3 +1,60 @@
+# Release notes — v1.1.0 (real-data benchmark)
+
+This release adds an **offline benchmark on real, public card-fraud data** (the ULB dataset). It is
+separate from the **live scoring platform**, which still runs only on the project's synthetic data
+with its existing models, policies and results. The benchmark's models were fitted offline and are
+not registered, deployed or used for live scoring. Its AP is not comparable with the synthetic-data
+results, because the two datasets and tasks differ.
+
+The demo video linked from the README is the earlier v1.0.0 recording of the synthetic-data
+platform. It does not show the real-data benchmark.
+
+Data: ULB credit-card fraud dataset (Worldline and the Machine Learning Group, Université Libre de
+Bruxelles). Please cite Dal Pozzolo, Caelen, Johnson and Bontempi, *Calibrating Probability with
+Undersampling for Unbalanced Classification*, CIDM (IEEE), 2015. Contains information from [Credit
+Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud), which is made
+available here under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/).
+
+* **ULB credit-card data** (real, anonymised, 2 days in September 2013, 284,807 transactions, 492
+  frauds). The benchmark ran on the OpenML 1597 v1 copy. It is downloaded by the user with a
+  checksum check and never committed.
+* **Protocol committed before evaluation**; held-out window (elapsed hours 32–48) evaluated once:
+  XGBoost AP 0.746 (95% CI 0.662–0.813), logistic regression 0.647 (0.507–0.752). Logistic
+  regression had the higher validation AP. No model is selected from held-out results, no
+  significance is claimed from the per-model intervals, and these models do not power the live
+  scoring service.
+* **Findings reported as measured:** a threshold fixed on validation produced a lower review rate
+  than its 0.5% budget on the test window. A stratified random split scored higher AP for both
+  models; this is descriptive only (different training sizes and test populations).
+* **Data limits:** PCA was applied upstream by the data owner and its fitting scope cannot be
+  verified; label-arrival times are unavailable; raw data is not redistributed.
+* **Source provenance:** the owner-listed Kaggle copy (`mlg-ulb/creditcardfraud` v3, ODbL v1.0
+  for the database, DbCL v1.0 for its contents) was compared cell by cell with the OpenML 1597 v1
+  copy the benchmark used. The data rows are identical (`reports/external/ulb/source_comparison.md`).
+  Kaggle is now the default acquisition route; the benchmark's recorded OpenML provenance is kept.
+  The ODbL §4.3 notice is carried with the published results. The derived tables and models stay
+  local (`THIRD_PARTY_NOTICES.md`).
+* **Reproducibility rerun:** the frozen protocol was rerun with the original's selected
+  configurations (no search). All 41 recorded values matched exactly in the recorded rerun
+  environment; the original run's environment was not recorded. Two reruns gave byte-identical
+  models and predictions. Those artifacts are saved locally and not published
+  (`reports/external/ulb/reproduction.md`). The rerun is logged as a separate MLflow run, linked
+  to the imported historical run.
+* **Experiment tracking and dashboard:** the completed run is imported into MLflow as a historical
+  run, and the dashboard's historical results show a labelled "Real-data offline benchmark" entry.
+* **Integration-test harness:** the Redis-outage tests now verify the disposable Redis container
+  while it is running and record its immutable ID. Ownership is an explicit label,
+  `fraudplat.test-resource=disposable-redis`. It is set only by `docker-compose.test.yml` and by
+  the CI Redis service container, which has no Compose labels. The tests pause the container and
+  clean up by that ID in a `finally` clause, without re-checking ownership through `docker port`, which reports nothing
+  for a paused container on Docker Engine 29.8.0. Cleanup failures are attached to the original
+  test failure. `make test-redis-recover` unpauses only the verified test container after an
+  interrupted run.
+* Reports: `reports/external/ulb/benchmark.md`, `reproduction.md`; how to reproduce:
+  `docs/DATASET_CARD.md`; provenance: `THIRD_PARTY_NOTICES.md`.
+
+---
+
 # Release notes — v1.0.1 (maintenance)
 
 No models, policies, thresholds or held-out results changed; no evaluation or benchmark was rerun.

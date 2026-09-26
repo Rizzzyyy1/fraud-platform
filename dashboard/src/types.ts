@@ -173,7 +173,7 @@ export interface ResultRow {
 export interface ResultSet {
   key: string;
   title: string;
-  split: "development" | "held-out";
+  split: "development" | "held-out" | "external";
   split_detail: string;
   source: string;
   rows: ResultRow[];

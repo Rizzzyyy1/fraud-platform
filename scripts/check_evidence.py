@@ -161,6 +161,39 @@ def claims() -> list[tuple[str, list[str], str]]:
 
     text = f"raw ECE: logistic regression {ece('lr')}, XGBoost {ece('xgb')}"
     out.append(("comparison-stage calibration (report.json)", [README, MODEL_CARD, NOTES], text))
+    ulb = load("reports/external/ulb/benchmark.json")["families"]
+
+    def ulb_ap(family: str) -> str:
+        t = ulb[family]["test"]
+        lo, hi = t["ci95"]["average_precision"]
+        return f"{r(t['average_precision'], 3)} (95% CI {r(lo, 3)}{DASH}{r(hi, 3)})"
+
+    out.append(("ULB benchmark (benchmark.json)", [README, NOTES], f"XGBoost AP {ulb_ap('xgb')}"))
+    out.append(
+        (
+            "ULB benchmark (benchmark.json)",
+            [README, NOTES],
+            f"logistic regression {r(ulb['lr']['test']['average_precision'], 3)}",
+        )
+    )
+    sources = load("reports/external/ulb/source_comparison.json")
+    if sources["identical_data"] and sources["cells"]["text_differences"] == 0:
+        out.append(
+            (
+                "ULB source comparison (source_comparison.json)",
+                ["THIRD_PARTY_NOTICES.md", "docs/PROGRESS.md"],
+                f"{sources['cells']['total']:,} cells",
+            )
+        )
+    rerun = load("reports/external/ulb/reproduction.json")["comparison"]
+    if rerun["all_within_tolerance"] and rerun["max_abs_diff"] == 0:
+        out.append(
+            (
+                "ULB reproducibility rerun (reproduction.json)",
+                [NOTES],
+                f"All {len(rerun['rows'])} recorded values matched exactly",
+            )
+        )
     return out
 
 

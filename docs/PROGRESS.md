@@ -581,3 +581,38 @@ build (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126). Re
 * Browser smoke test added to CI (real console and dashboard build, seeded disposable database;
   not the streaming system). The failure drill remains in the full local walkthrough.
 * This public repository is the source of truth for future public development (`PROVENANCE.md`).
+
+## v1.1.0 real-data benchmark
+
+* Offline benchmark on the real ULB card-fraud data (`reports/external/ulb/benchmark.md`),
+  protocol committed before the held-out window was evaluated once. Held-out AP: XGBoost 0.746,
+  logistic regression 0.647 (logistic regression higher on validation; no model selected from
+  held-out results). Validation threshold gave a lower-than-budgeted review rate; the random-split
+  column is descriptive only. Imported into MLflow as a historical run and shown in the dashboard's
+  historical results. No change to the platform or its results.
+* Source provenance: the owner-listed Kaggle copy (`mlg-ulb/creditcardfraud` v3; ODbL v1.0 for the
+  database, DbCL v1.0 for the contents) is identical to the OpenML 1597 v1 copy the benchmark used.
+  The comparison covered columns, 284,807 rows in order, and 8,829,017 cells as text and as parsed
+  numbers (`reports/external/ulb/source_comparison.md`). `make ulb-fetch` now uses Kaggle. The
+  benchmark's recorded provenance stays OpenML. `THIRD_PARTY_NOTICES.md` lists the ODbL sections
+  relevant to what is published and the approach taken: the §4.3 example notice on published
+  results, and the derivation code published in line with §4.6(b). The derived tables and models
+  stay local.
+* Redis-outage test fix: on Docker Engine 29.8.0, `docker port` reports nothing for a paused
+  container. The old helper re-checked ownership that way before unpausing, so it refused to
+  unpause and left the test Redis paused, and later integration tests failed. The helper now
+  verifies the container while it is running. Ownership is the explicit label
+  `fraudplat.test-resource=disposable-redis`, set by `docker-compose.test.yml` and by the CI Redis
+  service container, which has no Compose labels. The helper also checks the running state and
+  the test port (not the application's), and rejects a Compose project other than `fraud-itest`.
+  It records its immutable ID, and pauses and cleans up by
+  that ID in a `finally` clause. A cleanup failure is attached to the test's original failure
+  rather than replacing it. Regression tests use a fake Docker that reproduces the engine
+  behaviour. `make test-redis-recover` unpauses only a verified test container after a killed
+  run, which no `finally` clause can handle.
+* Reproducibility rerun (`reports/external/ulb/reproduction.md`): the frozen protocol was rerun with
+  the original's selected configurations. All 41 recorded values matched exactly (max difference 0)
+  in the recorded rerun environment; the original run's environment was not recorded.
+  Saved models reload to identical scores. Two reruns produced byte-identical models and
+  predictions. The artifacts are local only, under git-ignored `artifacts/`. The rerun is logged
+  as a separate MLflow run that links to the imported run, which is unchanged.

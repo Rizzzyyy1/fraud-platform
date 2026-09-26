@@ -148,6 +148,10 @@ const METRIC_LABELS: Record<string, string> = {
   flagged_recall: "Flagged recall",
   legitimate_reviewed: "Legitimate reviewed",
   review_rate: "Review rate",
+  validation_ap: "Validation AP",
+  roc_auc: "ROC AUC",
+  precision_at_threshold: "Precision at threshold",
+  recall_at_threshold: "Recall at threshold",
 };
 
 function metric(key: string, value: unknown): string {
@@ -163,7 +167,9 @@ function ResultTable({ set }: { set: ResultSet }) {
     <div className="panel">
       <div className="panel-head">
         <h2>{set.title}</h2>
-        <Badge tone={set.split === "held-out" ? "info" : "neutral"}>{set.split === "held-out" ? "Held-out test" : "Development"}</Badge>
+        <Badge tone={set.split === "held-out" ? "info" : set.split === "external" ? "warn" : "neutral"}>
+          {set.split === "held-out" ? "Held-out test" : set.split === "external" ? "Real data · offline only · not deployed" : "Development"}
+        </Badge>
         <span className="muted small">{set.split_detail}</span>
       </div>
       <div className="table-wrap">

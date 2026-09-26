@@ -1,0 +1,146 @@
+{
+  "dataset": "ULB credit-card fraud (OpenML 1597 v1), MD5 178bcf9bb1f31a3dfe12d0e577884add",
+  "created_at": "2026-09-26T03:52:30+00:00",
+  "protocol": {
+    "train_hours": [
+      0,
+      24
+    ],
+    "validation_hours": [
+      24,
+      32
+    ],
+    "test_hours": [
+      32,
+      48
+    ],
+    "review_budget": 0.005,
+    "bootstrap": "2000 resamples of test hour blocks",
+    "features": "V1-V28 (owner PCA) + Amount"
+  },
+  "windows": {
+    "train": {
+      "rows": 144786,
+      "frauds": 281
+    },
+    "validation": {
+      "rows": 17739,
+      "frauds": 75
+    },
+    "test": {
+      "rows": 122282,
+      "frauds": 136
+    }
+  },
+  "families": {
+    "lr": {
+      "grid": [
+        {
+          "config": {
+            "C": 0.01
+          },
+          "validation_ap": 0.8636
+        },
+        {
+          "config": {
+            "C": 0.1
+          },
+          "validation_ap": 0.7754
+        },
+        {
+          "config": {
+            "C": 1.0
+          },
+          "validation_ap": 0.7537
+        }
+      ],
+      "selected": {
+        "C": 0.01
+      },
+      "validation_ap": 0.8635966421274348,
+      "threshold_from_validation": 0.022697596375989094,
+      "test": {
+        "average_precision": 0.6466211327561527,
+        "roc_auc": 0.973586334964618,
+        "at_fixed_threshold": {
+          "review_rate": 0.0021916553540177624,
+          "precision": 0.41044776119402987,
+          "recall": 0.8088235294117647,
+          "flagged": 268,
+          "frauds_caught": 110
+        },
+        "ece_raw": 0.0003397481785796559,
+        "mean_score": 0.0013385386433866435,
+        "fraud_rate": 0.0011121833139791629,
+        "ci95": {
+          "average_precision": [
+            0.5067481372939062,
+            0.7522431236585166
+          ],
+          "precision": [
+            0.3303428951367781,
+            0.49106502816180225
+          ],
+          "recall": [
+            0.7480263608353304,
+            0.8616403922542205
+          ]
+        }
+      },
+      "random_split_contrast_ap": 0.7254635122117463
+    },
+    "xgb": {
+      "grid": [
+        {
+          "config": {
+            "max_depth": 3,
+            "n_estimators": 300
+          },
+          "validation_ap": 0.8276
+        },
+        {
+          "config": {
+            "max_depth": 5,
+            "n_estimators": 300
+          },
+          "validation_ap": 0.8205
+        }
+      ],
+      "selected": {
+        "max_depth": 3,
+        "n_estimators": 300
+      },
+      "validation_ap": 0.8275616177248908,
+      "threshold_from_validation": 0.1669040471315384,
+      "test": {
+        "average_precision": 0.7461569150203242,
+        "roc_auc": 0.9707974232379573,
+        "at_fixed_threshold": {
+          "review_rate": 0.0016437415155133217,
+          "precision": 0.5422885572139303,
+          "recall": 0.8014705882352942,
+          "flagged": 201,
+          "frauds_caught": 109
+        },
+        "ece_raw": 0.000550148938561714,
+        "mean_score": 0.0014907998265698552,
+        "fraud_rate": 0.0011121833139791629,
+        "ci95": {
+          "average_precision": [
+            0.6616091812818793,
+            0.8125036398027045
+          ],
+          "precision": [
+            0.4427716942923573,
+            0.6343651468056084
+          ],
+          "recall": [
+            0.7455961331901182,
+            0.8495591855745558
+          ]
+        }
+      },
+      "random_split_contrast_ap": 0.8263967632509008
+    }
+  }
+}

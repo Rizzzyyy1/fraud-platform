@@ -23,9 +23,12 @@ jobs:
           --health-cmd "pg_isready -U fraud -d fraud_test" --health-interval 2s
           --health-timeout 3s --health-retries 60
       redis:
+        # Paused by the Redis-outage tests. The label is the ownership contract that
+        # tests/safety.py requires before pausing; only disposable test Redis carries it.
         image: redis:8-alpine
         ports: ["6380:6379"]
         options: >-
+          --label fraudplat.test-resource=disposable-redis
           --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 3s
           --health-retries 60
       kafka:

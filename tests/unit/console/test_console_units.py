@@ -23,7 +23,7 @@ from fraudplat.console.queries import (
     decode_queue_cursor,
     encode_cursor,
 )
-from fraudplat.console.reports import REPORTS, report_text
+from fraudplat.console.reports import REPORTS, historical_results, report_text
 from fraudplat.console.telemetry import Snapshot, parse_prometheus, window_metrics
 
 from ..features.helpers import event, historical, us
@@ -223,3 +223,18 @@ def test_reports_are_served_by_key_only() -> None:
     assert report_text("../../.env") is None
     assert report_text("unknown") is None
     assert all(not path.startswith("/") and ".." not in path for _t, path in REPORTS.values())
+
+
+def test_real_data_benchmark_entry_is_labelled_and_matches_its_report() -> None:
+    [entry] = [r for r in historical_results() if r["key"] == "ulb_benchmark"]
+    source = json.loads(Path(entry["source"]).read_text())
+    assert entry["split"] == "external"
+    assert "do not power the live scoring service" in entry["note"]
+    assert "not comparable with the synthetic" in entry["note"]
+    assert "elapsed hours 32\u201348" in entry["split_detail"]
+    by_label = {row["label"]: row for row in entry["rows"]}
+    xgb = source["families"]["xgb"]
+    assert by_label["XGBoost"]["metrics"]["average_precision"] == xgb["test"]["average_precision"]
+    assert by_label["XGBoost"]["metrics"]["validation_ap"] == xgb["validation_ap"]
+    assert "not saved" in by_label["XGBoost"]["identity"]
+    assert report_text("ulb") is not None

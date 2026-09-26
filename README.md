@@ -9,10 +9,15 @@ in a React console. A portfolio project; everything runs on one laptop at no cos
 
 **▶ [Watch the demo video (4 min 21 s, real time, captioned)](https://github.com/Rizzzyyy1/fraud-platform/releases/download/v1.0.0/fraud-platform-demo.webm)** · [Release v1.0.0](https://github.com/Rizzzyyy1/fraud-platform/releases/tag/v1.0.0)
 
-<sub>Investigation view of a real decision from the local deployment. More:
+<sub>The video is the earlier v1.0.0 recording of the synthetic-data platform. It does not show the
+v1.1.0 real-data offline benchmark.</sub>
+
+<sub>Investigation view of a decision from the local demo deployment (historical capture,
+2026-09-25 walkthrough; see [screenshot provenance](docs/screenshots/README.md)). More:
 [live activity](docs/screenshots/02-live-activity.png) ·
 [failure drill](docs/screenshots/11-drill-scoring-suppressed.png) ·
-[model and system health](docs/screenshots/07-health.png) ·
+[model and system health, as of 2026-09-25](docs/screenshots/07-health.png) ·
+[real-data offline benchmark](docs/screenshots/16-real-data-benchmark.png) ·
 [demo script](docs/DEMO_SCRIPT.md)</sub>
 
 ## What I engineered
@@ -43,6 +48,7 @@ in a React console. A portfolio project; everything runs on one laptop at no cos
 | Held-out AP **0.357** (XGBoost candidate) vs **0.319** (LR baseline), non-overlapping 95% CIs | 301,001 held-out transactions, evaluated once. The candidate is **not promoted**. The **active** release is the LR baseline with a **review-only policy that has no held-out result** (development review rate 0.88–1.03%). [report](reports/release-1/test_evaluation.md) |
 | Failure drill: worker stopped 90 s → **156 of 750** decisions stored as scoreless reviews, **0** HTTP errors, automatic recovery | Real thresholds, 5 transactions/s. [walkthrough](reports/dashboard/walkthrough.json) |
 | **2,221** demo requests → **2,221** new decisions, **0** dead-lettered events, including a SIGKILLed worker and cancelled jobs | Repeatability check on a clean setup. [report](reports/dashboard/repeatability.json) |
+| Real-data offline benchmark (public ULB card-fraud data, anonymised, 48 elapsed hours), held-out last 16 h evaluated once: XGBoost AP 0.746 (95% CI 0.662–0.813), logistic regression 0.647 (0.507–0.752); logistic regression had the higher validation AP | Checks the modelling and evaluation method on real transactions. No model is selected from held-out results, these models do not power the live service, and their AP is not comparable with the synthetic results. [report](reports/external/ulb/benchmark.md) |
 | 100 rps with p95 12.1 ms in one benchmark run, **but only 4 of 6** sustained runs per model met the latency criterion | Latency on this machine is **inconsistent**; cause not established. [diagnosis](reports/serving_diagnosis/summary.md) |
 
 ## Launch in brief
@@ -61,7 +67,9 @@ make dashboard                        # open http://127.0.0.1:8200
 
 ## Limitations
 
-* **Synthetic data only**; nothing here is evidence about real payments or real savings.
+* **The platform runs on synthetic data**; nothing here is evidence about real payments or real
+  savings. The only real-data result is an offline benchmark on the anonymised ULB dataset, which
+  has no customer or merchant IDs and so cannot feed the streaming features.
 * Both models essentially **miss scenario 2** (compromised terminals, ~60% of simulated fraud;
   recall ≈ 0.01).
 * Scores are **risk scores, not probabilities.** Calibration was examined only for the
@@ -199,6 +207,7 @@ volumes; removing them (`docker compose down -v`) deletes all local data.
 ```bash
 make check                    # ruff, mypy --strict, unit tests, isolated integration tests
 make test-integration         # integration tests only, on disposable services
+make test-redis-recover       # unpause the disposable test Redis after an interrupted run
 make test-services-down       # stop and discard those services
 make dashboard-test           # dashboard type check and component tests
 make smoke                    # browser smoke test (needs `make dashboard-build` first)
@@ -223,8 +232,24 @@ separate Compose project (`docker-compose.test.yml`, project `fraud-itest`, port
 9394, database in memory) and runs the tests against it. Before any destructive step (migrating
 down, truncating, flushing, deleting topics, pausing a container) a guard in `tests/safety.py`
 refuses targets that are the application's database, Redis or Kafka, or on the same server, and
-the Redis-outage tests pause only a container named explicitly in `FRAUD_TEST_REDIS_CONTAINER`
-that publishes the test Redis port.
+the Redis-outage tests pause only a container named explicitly in `FRAUD_TEST_REDIS_CONTAINER`.
+Before pausing, that container is checked while it is running. It must carry the ownership label
+`fraudplat.test-resource=disposable-redis`, set only by `docker-compose.test.yml` and by the CI
+workflow's Redis service container (a unit test checks both, and checks that the application's
+`docker-compose.yml` never sets it). It must also publish the test Redis port and not the
+application's. If it carries a Compose project label, the project must be `fraud-itest`. Its immutable container ID
+is recorded, and the pause and the cleanup act on that ID only. Cleanup runs in a `finally` clause,
+after assertion failures and exceptions too. If cleanup itself fails, the error is attached to the
+test's original failure rather than replacing it.
+
+A `finally` clause cannot run if the test process is killed (SIGKILL, an interpreter crash, the
+machine stopping), so an interrupted run can leave the test Redis paused. The next outage test then
+refuses to start and says so. To recover, run `make test-redis-recover`. It finds the `redis`
+service of the `fraud-itest` project and checks its ownership label and configured port binding,
+which Docker keeps while a container is paused. It unpauses the container only if those checks
+pass, and never acts on any other container. The manual equivalent is to verify that
+`docker inspect -f '{{index .Config.Labels "fraudplat.test-resource"}}' <id>` prints
+`disposable-redis`, then run `docker unpause <id>`.
 
 Browser walkthrough (running stack and an admin account; every check is an assertion and failures
 keep evidence in `run/e2e-evidence/`):
@@ -260,10 +285,14 @@ Simulated data; one Apple M1 laptop; see each source for conditions.
 
 ## Screenshots
 
+Historical captures from the 2026-09-25 scripted walkthrough. They show the state at that time,
+not the current health of any deployment. Provenance, including which states were injected:
+[docs/screenshots/README.md](docs/screenshots/README.md).
+
 | Live activity | Investigation |
 |---|---|
 | ![Live activity](docs/screenshots/02-live-activity.png) | ![Investigation](docs/screenshots/04-investigation-detail.png) |
-| **Model & system health** | **Failure drill: scoring suppressed** |
+| **Model & system health (as of 2026-09-25)** | **Failure drill: scoring suppressed** |
 | ![Health](docs/screenshots/07-health.png) | ![Drill](docs/screenshots/11-drill-scoring-suppressed.png) |
 
 All screenshots: [docs/screenshots/](docs/screenshots/). Demo: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
@@ -278,3 +307,10 @@ process in Le Borgne et al., *Reproducible Machine Learning for Credit Card Frau
 Practical Handbook* (2022); it adapts that design and the example's parameter values, with
 attribution. What was consulted, what was adapted and what was written independently are listed
 in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Dependencies keep their own licenses.
+
+The real-data benchmark uses the ULB credit-card dataset (Worldline and ULB MLG; cite Dal
+Pozzolo et al., CIDM 2015). It is downloaded by the user from the owner-listed source and never
+redistributed here. Contains information from [Credit Card Fraud
+Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud), which is made available here
+under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/). Source
+comparison and licence details: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

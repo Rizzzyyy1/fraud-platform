@@ -81,6 +81,9 @@ try {
   await page.getByRole("heading", { name: "Running deployment" }).waitFor();
   const unavailable = await page.getByText(/Running API: unavailable/).count();
   await check("health view loads and reports the scoring API unavailable (not run in the smoke test)", unavailable === 1, { unavailable_badges: unavailable });
+  const benchmark = await page.getByRole("heading", { name: "Real-data offline benchmark (ULB)" }).count();
+  const notDeployed = await page.getByText("Real data · offline only · not deployed").count();
+  await check("real-data benchmark shown as offline and not deployed", benchmark === 1 && notDeployed === 1, { benchmark, notDeployed });
   await page.getByRole("tab", { name: /Investigation/ }).click();
   await page.getByRole("tab", { name: /^Open/ }).waitFor();
   const open = (await api("/api/queue?status=open&limit=20")).body.counts.open;

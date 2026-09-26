@@ -1,0 +1,117 @@
+{
+  "openml": {
+    "file": "creditcard.arff (OpenML 1597 v1)",
+    "md5": "178bcf9bb1f31a3dfe12d0e577884add",
+    "sha256": "fdaf12730dc1fc426f318b71349f24f5c5fd00aa1152940be7e7509ae3d89d2a"
+  },
+  "kaggle": {
+    "file": "creditcard.csv in archive.zip (Kaggle mlg-ulb/creditcardfraud v3)",
+    "archive_sha256": "a0360ce715992212e9ac72d8ccdca97f4be87dc1fdf2bed011358f7ab409a28a",
+    "csv_md5": "e90efcb83d69faf99fcab8b0255024de",
+    "csv_sha256": "76274b691b16a6c49d3f159c883398e03ccd6d1ee12d9d8ee38f4b4b98551a89",
+    "dataset": "mlg-ulb/creditcardfraud",
+    "owner": "Machine Learning Group - ULB (mlg-ulb)",
+    "version": 3,
+    "version_updated": "2018-03-23T01:17:27.913Z",
+    "license": "Database: Open Database, Contents: Database Contents",
+    "downloaded_at": "2026-09-26T17:05:05Z",
+    "download": "https://www.kaggle.com/api/v1/datasets/download/mlg-ulb/creditcardfraud (Kaggle's official endpoint; no sign-in was requested)"
+  },
+  "columns": {
+    "openml": [
+      "Time",
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6",
+      "V7",
+      "V8",
+      "V9",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "V20",
+      "V21",
+      "V22",
+      "V23",
+      "V24",
+      "V25",
+      "V26",
+      "V27",
+      "V28",
+      "Amount",
+      "Class"
+    ],
+    "kaggle": [
+      "Time",
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6",
+      "V7",
+      "V8",
+      "V9",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "V20",
+      "V21",
+      "V22",
+      "V23",
+      "V24",
+      "V25",
+      "V26",
+      "V27",
+      "V28",
+      "Amount",
+      "Class"
+    ],
+    "same_names_and_order": true
+  },
+  "rows": {
+    "openml": 284807,
+    "kaggle": 284807
+  },
+  "labels": {
+    "openml": {
+      "0": 284315,
+      "1": 492
+    },
+    "kaggle": {
+      "0": 284315,
+      "1": 492
+    }
+  },
+  "cells": {
+    "total": 8829017,
+    "text_differences": 0,
+    "text_differences_by_column": {},
+    "float64_differences": 0,
+    "float64_differences_by_column": {},
+    "class_label_differences": 0,
+    "text_difference_examples": []
+  },
+  "row_order": {
+    "row_by_row_identical_after_parsing": true
+  },
+  "identical_data": true,
+  "loader_output_identical": true
+}
