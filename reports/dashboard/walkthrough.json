@@ -1,0 +1,327 @@
+{
+  "started_at": "2026-09-25T20:26:07.648Z",
+  "base_url": "http://127.0.0.1:8200",
+  "checks": [
+    {
+      "name": "anonymous API reads are rejected with 401",
+      "passed": true,
+      "observed": [
+        401,
+        401,
+        401,
+        401
+      ]
+    },
+    {
+      "name": "session cookie is HttpOnly, SameSite=Strict, path /",
+      "passed": true,
+      "observed": {
+        "httpOnly": true,
+        "sameSite": "Strict",
+        "path": "/"
+      }
+    },
+    {
+      "name": "session cookie is not readable from page scripts",
+      "passed": true,
+      "observed": {
+        "visible_to_script": false
+      }
+    },
+    {
+      "name": "dashboard bundle contains no API-key header",
+      "passed": true,
+      "observed": {
+        "scripts": 1,
+        "mentions_api_key_header": false
+      }
+    },
+    {
+      "name": "traffic job running",
+      "passed": true,
+      "observed": [
+        {
+          "id": 20,
+          "kind": "traffic",
+          "params": {
+            "rate": 10,
+            "duration_s": 180
+          },
+          "status": "running",
+          "requested_by": "e2e-admin",
+          "start_offset": 17700,
+          "sent": 0,
+          "outcomes": {},
+          "message": null,
+          "created_at": "2026-09-25T20:26:09.463170Z",
+          "finished_at": null,
+          "hold": null
+        }
+      ]
+    },
+    {
+      "name": "empty state shown for a filter with no rows",
+      "passed": true,
+      "observed": {
+        "filter": "action=decline"
+      }
+    },
+    {
+      "name": "both reviews persisted",
+      "passed": true,
+      "observed": {
+        "transaction_id": "D1790344814-TX001417794",
+        "statuses": [
+          "in_review",
+          "closed"
+        ]
+      }
+    },
+    {
+      "name": "original decision unchanged by the reviews",
+      "passed": true,
+      "observed": {
+        "identities": {
+          "model": "lr-f1-6f0ebad8fcc7",
+          "policy": "pol-6164cb21826d",
+          "registry": "fraud-risk-f1/5"
+        }
+      }
+    },
+    {
+      "name": "loading state shown while the queue loads",
+      "passed": true,
+      "observed": {
+        "delay_ms": 3000
+      }
+    },
+    {
+      "name": "error state shown when the queue request fails",
+      "passed": true,
+      "observed": {
+        "injected_status": 500
+      }
+    },
+    {
+      "name": "running model matches the alias target",
+      "passed": true,
+      "observed": {
+        "running": {
+          "model_version": "lr-f1-6f0ebad8fcc7",
+          "policy_version": "pol-6164cb21826d",
+          "uri": "models:/fraud-risk-f1@production",
+          "registry_ref": "fraud-risk-f1/5",
+          "source": "registry"
+        },
+        "target": {
+          "uri": "models:/fraud-risk-f1@production",
+          "registry_ref": "fraud-risk-f1/5",
+          "model_version": "lr-f1-6f0ebad8fcc7",
+          "policy_version": "pol-6164cb21826d"
+        }
+      }
+    },
+    {
+      "name": "polling stays bounded (at most 60 console requests per minute per tab)",
+      "passed": true,
+      "observed": {
+        "requests_per_minute": 44,
+        "by_path": {
+          "/api/jobs": {
+            "requests": 20,
+            "mean_ms": 39.4
+          },
+          "/api/decisions": {
+            "requests": 12,
+            "mean_ms": 6.7
+          },
+          "/api/activity": {
+            "requests": 6,
+            "mean_ms": 45.2
+          },
+          "/api/health": {
+            "requests": 6,
+            "mean_ms": 62.1
+          }
+        }
+      }
+    },
+    {
+      "name": "stale state shown while the console is unreachable",
+      "passed": true,
+      "observed": {
+        "stale_badges": 2,
+        "pipeline_badge_stale": 1
+      }
+    },
+    {
+      "name": "previous job finished before the drill",
+      "passed": true,
+      "observed": {}
+    },
+    {
+      "name": "live-activity page 2 has different rows",
+      "passed": true,
+      "observed": {
+        "page1": [
+          "D1790344814-TX001423099",
+          "D1790344814-TX001423098",
+          "D1790344814-TX001423097"
+        ],
+        "page2": [
+          "D1790344814-TX001423074",
+          "D1790344814-TX001423073",
+          "D1790344814-TX001423072"
+        ]
+      }
+    },
+    {
+      "name": "investigation page 2 has different rows",
+      "passed": true,
+      "observed": {
+        "page1": [
+          "D1790344814-TX001420472",
+          "D1790344814-TX001411533",
+          "D1790344814-TX001409306"
+        ],
+        "page2": [
+          "D1790344814-TX001414580",
+          "D1790344814-TX001417212",
+          "D1790344814-TX001416989"
+        ]
+      }
+    },
+    {
+      "name": "drill phase 1: degraded, worker stopped, still scoring",
+      "passed": true,
+      "observed": {
+        "status": "degraded",
+        "degraded": [
+          "WORKER_HEARTBEAT_STALE"
+        ],
+        "suppress_scoring": null,
+        "worker": {
+          "pid": null,
+          "state": "stopped by failure drill"
+        }
+      }
+    },
+    {
+      "name": "drill phase 2: scoring suppressed (suppress_scoring is the stale-limit reason)",
+      "passed": true,
+      "observed": {
+        "status": "degraded",
+        "suppress_scoring": "PIPELINE_STALE_BEYOND_LIMIT",
+        "heartbeat_age_s": 78.564049
+      }
+    },
+    {
+      "name": "drill phase 3: recovered (ready, not suppressed, drained, worker running, drill succeeded with scoreless reviews)",
+      "passed": true,
+      "observed": {
+        "ok": true,
+        "status": "ready",
+        "suppress_scoring": null,
+        "backlog": 0,
+        "lag": 0,
+        "worker": {
+          "pid": 53656,
+          "state": "running"
+        },
+        "drill": {
+          "id": 21,
+          "status": "succeeded",
+          "sent": 750,
+          "outcomes": {
+            "review": 6,
+            "approve": 588,
+            "scoreless_review": 156
+          },
+          "message": "worker stopped at t=20s; worker hold released; launcher restarts it"
+        }
+      }
+    },
+    {
+      "name": "logout rejects further reads, including with the old session cookie",
+      "passed": true,
+      "observed": {
+        "after_logout": 401,
+        "old_cookie_replayed": 401
+      }
+    },
+    {
+      "name": "no unexpected browser console errors",
+      "passed": true,
+      "observed": []
+    }
+  ],
+  "steps": [
+    {
+      "name": "screenshot 01-sign-in",
+      "at": "2026-09-25T20:26:09.060Z"
+    },
+    {
+      "name": "screenshot 02-live-activity",
+      "at": "2026-09-25T20:26:41.584Z"
+    },
+    {
+      "name": "screenshot 13-empty-state",
+      "at": "2026-09-25T20:26:41.661Z"
+    },
+    {
+      "name": "screenshot 03-live-scoreless-filter",
+      "at": "2026-09-25T20:26:43.711Z"
+    },
+    {
+      "name": "screenshot 04-investigation-detail",
+      "at": "2026-09-25T20:26:45.540Z"
+    },
+    {
+      "name": "screenshot 05-review-recorded",
+      "at": "2026-09-25T20:26:46.793Z"
+    },
+    {
+      "name": "screenshot 06-queue-closed",
+      "at": "2026-09-25T20:26:48.373Z"
+    },
+    {
+      "name": "screenshot 14-loading-state",
+      "at": "2026-09-25T20:26:48.449Z"
+    },
+    {
+      "name": "screenshot 15-error-state",
+      "at": "2026-09-25T20:26:48.565Z"
+    },
+    {
+      "name": "screenshot 07-health",
+      "at": "2026-09-25T20:26:50.800Z"
+    },
+    {
+      "name": "screenshot 08-report-held-out",
+      "at": "2026-09-25T20:26:50.946Z"
+    },
+    {
+      "name": "screenshot 09-stale-console-unreachable",
+      "at": "2026-09-25T20:28:19.085Z"
+    },
+    {
+      "name": "failure drill started from the UI",
+      "at": "2026-09-25T20:29:19.941Z"
+    },
+    {
+      "name": "screenshot 10-drill-degraded",
+      "at": "2026-09-25T20:30:05.141Z"
+    },
+    {
+      "name": "screenshot 11-drill-scoring-suppressed",
+      "at": "2026-09-25T20:31:03.313Z"
+    },
+    {
+      "name": "screenshot 12-drill-recovered",
+      "at": "2026-09-25T20:32:00.277Z"
+    }
+  ],
+  "console_errors": [],
+  "passed": true,
+  "finished_at": "2026-09-25T20:32:00.344Z"
+}

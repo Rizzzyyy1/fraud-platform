@@ -1,0 +1,444 @@
+{
+  "machine": {
+    "platform": "macOS-15.2-arm64-arm-64bit-Mach-O",
+    "cpu": "Apple M1",
+    "cores": "8",
+    "memory_gib": 16.0,
+    "python": "3.14.0",
+    "container_runtime": "Colima VM: 6 CPU, 8 GiB",
+    "compose_limits": {
+      "postgres": "512 MiB",
+      "redis": "512 MiB (maxmemory 384 MiB)",
+      "kafka": "1 GiB (heap 512 MiB)"
+    }
+  },
+  "model_version": "xgb-f1-1f168d371c42",
+  "policy_version": "pol-c51799ac9da6",
+  "dataset": "sim-v2 (synthetic), transactions decided after day 140 in decision order",
+  "method": {
+    "load": "open loop",
+    "warmup_s": 5.0,
+    "duration_s": 20.0,
+    "max_in_flight": 64,
+    "api_processes": 1,
+    "client": "httpx AsyncClient, same machine"
+  },
+  "setup": {
+    "bootstrap_events": 321167,
+    "bootstrap_seconds": 13.37,
+    "excluded_already_decided_by_other_stream": [
+      "TX001403579",
+      "TX001403580",
+      "TX001403581"
+    ],
+    "stale_replay_rows_removed": 0
+  },
+  "db_clock_minus_host_clock_ms": 86.25,
+  "readiness_at_start": {
+    "database": true,
+    "scorer": true,
+    "model": {
+      "model_version": "xgb-f1-1f168d371c42",
+      "policy_version": "pol-c51799ac9da6",
+      "uri": "models:/fraud-risk-f1@release-1-candidate",
+      "registry_ref": "fraud-risk-f1/4",
+      "source": "registry"
+    },
+    "feature_store": true,
+    "pipeline": {
+      "namespace": "replay:bench-1790306642",
+      "outbox_backlog": 0,
+      "oldest_unpublished_age_s": null,
+      "broker_view_age_ms": 222,
+      "worker_heartbeat_age_s": 0.275883,
+      "consumer_lag_events": 0,
+      "unknown_state_for_s": null,
+      "reject": null
+    },
+    "degraded": [],
+    "status": "ready"
+  },
+  "namespace": "replay:bench-1790306642",
+  "idle_memory": {
+    "docker": {
+      "fraud-platform-kafka-1": "671.6MiB / 1GiB",
+      "fraud-platform-redis-1": "310MiB / 512MiB",
+      "fraud-platform-postgres-1": "150.2MiB / 512MiB"
+    },
+    "processes_rss_mib": {
+      "api": 284.4,
+      "publisher": 44.6,
+      "worker": 63.6
+    }
+  },
+  "levels": [
+    {
+      "target_rps": 100.0,
+      "scheduled_total": 2497,
+      "sent_total": 2497,
+      "measured_window": {
+        "scheduled": 1997,
+        "completed_with_response": 1997,
+        "timed_out": 0,
+        "failed_http_or_rejected": 0,
+        "achieved_completion_rps": 100.0,
+        "outcomes": {
+          "model_scored": 1997
+        }
+      },
+      "scheduling_delay_ms": {
+        "p50": 0.49,
+        "p95": 1.13,
+        "p99": 42.46,
+        "max": 238.21,
+        "mean": 2.06
+      },
+      "late_starts_over_50ms": 20,
+      "latency_ms_all_responses": {
+        "p50": 7.19,
+        "p95": 14.1,
+        "p99": 72.67,
+        "max": 266.87,
+        "mean": 9.15
+      },
+      "latency_ms_model_scored_only": {
+        "p50": 7.19,
+        "p95": 14.1,
+        "p99": 72.67,
+        "max": 266.87,
+        "mean": 9.15
+      },
+      "memory_during_load": {
+        "docker": {
+          "fraud-platform-kafka-1": "744.5MiB / 1GiB",
+          "fraud-platform-redis-1": "310.1MiB / 512MiB",
+          "fraud-platform-postgres-1": "159.3MiB / 512MiB"
+        },
+        "processes_rss_mib": {
+          "api": 268.6,
+          "publisher": 46.6,
+          "worker": 64.0
+        }
+      },
+      "pipeline": {
+        "delay": {
+          "decision_to_applied_ms_host_clock": {
+            "p50": 52.44,
+            "p95": 95.33,
+            "p99": 204.59,
+            "max": 300.85,
+            "mean": 56.11
+          },
+          "outbox_created_to_published_ms_db_clock": {
+            "p50": 33.05,
+            "p95": 58.93,
+            "p99": 69.29,
+            "max": 121.08,
+            "mean": 33.5
+          },
+          "applied": 1997,
+          "of": 1997
+        },
+        "unapplied_at_load_end": 20,
+        "drain_seconds_after_load": 0.27,
+        "unapplied_after_drain": 0,
+        "max_outbox_backlog_during_load": 6,
+        "max_worker_lag_during_load": 0,
+        "max_redis_used_mb": 289.4,
+        "timeline": [
+          {
+            "t_s": 0.0,
+            "outbox_backlog": 0,
+            "worker_lag": 0,
+            "redis_used_mb": 289.1,
+            "cpu_percent": {
+              "api": 0.1,
+              "publisher": 0.7,
+              "worker": 0.0
+            }
+          },
+          {
+            "t_s": 1.0,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 23.4,
+              "publisher": 1.5,
+              "worker": 5.3
+            }
+          },
+          {
+            "t_s": 2.1,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 22.6,
+              "publisher": 1.5,
+              "worker": 5.2
+            }
+          },
+          {
+            "t_s": 3.1,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.1,
+            "cpu_percent": {
+              "api": 22.1,
+              "publisher": 1.2,
+              "worker": 5.1
+            }
+          },
+          {
+            "t_s": 4.1,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 23.1,
+              "publisher": 1.2,
+              "worker": 5.1
+            }
+          },
+          {
+            "t_s": 5.1,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 23.8,
+              "publisher": 1.3,
+              "worker": 5.0
+            }
+          },
+          {
+            "t_s": 6.2,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 26.1,
+              "publisher": 1.6,
+              "worker": 6.1
+            }
+          },
+          {
+            "t_s": 7.2,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 21.9,
+              "publisher": 1.3,
+              "worker": 4.5
+            }
+          },
+          {
+            "t_s": 8.2,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 23.2,
+              "publisher": 1.2,
+              "worker": 4.7
+            }
+          },
+          {
+            "t_s": 9.2,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 23.4,
+              "publisher": 1.5,
+              "worker": 5.3
+            }
+          },
+          {
+            "t_s": 10.3,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 24.0,
+              "publisher": 1.5,
+              "worker": 5.2
+            }
+          },
+          {
+            "t_s": 11.3,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 23.8,
+              "publisher": 1.5,
+              "worker": 5.3
+            }
+          },
+          {
+            "t_s": 12.3,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 26.1,
+              "publisher": 1.5,
+              "worker": 6.1
+            }
+          },
+          {
+            "t_s": 13.3,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 22.5,
+              "publisher": 1.2,
+              "worker": 5.0
+            }
+          },
+          {
+            "t_s": 14.3,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 22.3,
+              "publisher": 1.2,
+              "worker": 4.7
+            }
+          },
+          {
+            "t_s": 15.4,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 25.5,
+              "publisher": 1.5,
+              "worker": 5.0
+            }
+          },
+          {
+            "t_s": 16.4,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 25.0,
+              "publisher": 1.2,
+              "worker": 5.2
+            }
+          },
+          {
+            "t_s": 17.4,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 24.9,
+              "publisher": 1.6,
+              "worker": 5.2
+            }
+          },
+          {
+            "t_s": 18.5,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 24.0,
+              "publisher": 1.2,
+              "worker": 5.5
+            }
+          },
+          {
+            "t_s": 19.5,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 22.7,
+              "publisher": 1.3,
+              "worker": 5.0
+            }
+          },
+          {
+            "t_s": 20.5,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 22.8,
+              "publisher": 1.2,
+              "worker": 4.6
+            }
+          },
+          {
+            "t_s": 21.5,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 22.6,
+              "publisher": 1.3,
+              "worker": 4.7
+            }
+          },
+          {
+            "t_s": 22.6,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 22.2,
+              "publisher": 1.5,
+              "worker": 4.5
+            }
+          },
+          {
+            "t_s": 23.6,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 24.7,
+              "publisher": 1.5,
+              "worker": 5.8
+            }
+          },
+          {
+            "t_s": 24.6,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 10.5,
+              "publisher": 1.1,
+              "worker": 2.9
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "decision_identities": [
+    {
+      "model_version": "xgb-f1-1f168d371c42",
+      "policy_version": "pol-c51799ac9da6",
+      "model_registry_ref": "fraud-risk-f1/4",
+      "decisions": 2497
+    }
+  ],
+  "redis_memory": {
+    "maxmemory_mb": 384.0,
+    "before_bootstrap": "145.83M",
+    "after_bootstrap": "289.09M",
+    "after_run": "289.43M",
+    "peak_sampled_mb": 289.4,
+    "server_lifetime_peak": "384.18M"
+  }
+}

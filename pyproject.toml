@@ -1,0 +1,69 @@
+[project]
+name = "fraud-platform"
+version = "0.1.0"
+description = "Real-time fraud detection and decisioning platform on simulated payment data."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.13",
+    "confluent-kafka>=2.6",
+    "fastapi>=0.115",
+    "mlflow>=3.1",
+    "numpy>=2.1",
+    "polars>=1.9",
+    "prometheus-client>=0.21",
+    "psycopg[binary,pool]>=3.2",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+    "redis>=5.2",
+    "scikit-learn>=1.5",
+    "sqlalchemy>=2.0",
+    "uvicorn[standard]>=0.30",
+    "xgboost>=2.1",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.27",
+    "mypy>=1.11",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fraudplat"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF"]
+ignore = ["S101"]  # assert is the pytest idiom
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S105", "S106", "S311"]  # literal test credentials; seeded shuffles
+
+[tool.mypy]
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["src", "tests"]
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*"]
+ignore_missing_imports = true  # scikit-learn ships no type information
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+markers = [
+    "integration: requires the Compose services (make up)",
+]
+addopts = "-m 'not integration'"

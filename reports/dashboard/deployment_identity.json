@@ -1,0 +1,43 @@
+{
+  "checked_at": "2026-09-25T15:38:52+00:00",
+  "namespace": "replay:dashboard-1790344814",
+  "registry_target": {
+    "uri": "models:/fraud-risk-f1@production",
+    "registry_ref": "fraud-risk-f1/5",
+    "model_version": "lr-f1-6f0ebad8fcc7",
+    "policy_version": "pol-6164cb21826d",
+    "version_created_at": "2026-09-25T13:20:07+00:00"
+  },
+  "running_deployment": {
+    "api_pid": 11095,
+    "api_started_at": "2026-09-25T14:21:53+00:00",
+    "readyz_model": {
+      "model_version": "lr-f1-6f0ebad8fcc7",
+      "policy_version": "pol-6164cb21826d",
+      "uri": "models:/fraud-risk-f1@production",
+      "registry_ref": "fraud-risk-f1/5",
+      "source": "registry"
+    },
+    "readyz_status": "ready"
+  },
+  "latest_persisted_decision": {
+    "transaction_id": "D1790344814-TX001412305",
+    "decision_time": "2026-09-25 15:38:01.791537+00:00",
+    "persisted_at": "2026-09-25 15:38:01.886023+00:00",
+    "score": 0.005479377064005993,
+    "action": "approve",
+    "model_version": "lr-f1-6f0ebad8fcc7",
+    "policy_version": "pol-6164cb21826d",
+    "feature_version": "f1",
+    "model_registry_ref": "fraud-risk-f1/5"
+  },
+  "decisions_by_identity": [
+    {
+      "model_version": "lr-f1-6f0ebad8fcc7",
+      "policy_version": "pol-6164cb21826d",
+      "model_registry_ref": "fraud-risk-f1/5",
+      "n": 8700
+    }
+  ],
+  "consistent": true
+}

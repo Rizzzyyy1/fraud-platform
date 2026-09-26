@@ -1,0 +1,85 @@
+{
+  "machine": {
+    "platform": "macOS-15.2-arm64-arm-64bit-Mach-O",
+    "processor": "arm",
+    "python": "3.14.0"
+  },
+  "results": [
+    {
+      "fraction": 0.1,
+      "generate": {
+        "rows": 179330,
+        "generate_s": 0.7436432499671355,
+        "write_and_hash_s": 0.10703104105778039,
+        "output_mib": 3.0888500213623047,
+        "peak_rss_mib": 253.3125
+      },
+      "reconstruct": {
+        "rows": 179330,
+        "read_s": 0.008065624977461994,
+        "to_events_s": 1.548528040992096,
+        "reconstruct_s": 5.2168345000827685,
+        "reconstruct_us_per_row": 29.090695924177595,
+        "matrix_mib": 20.522689819335938,
+        "peak_rss_mib": 283.5625
+      }
+    },
+    {
+      "fraction": 0.25,
+      "generate": {
+        "rows": 460234,
+        "generate_s": 2.237139750039205,
+        "write_and_hash_s": 0.2499755829339847,
+        "output_mib": 7.718737602233887,
+        "peak_rss_mib": 456.953125
+      },
+      "reconstruct": {
+        "rows": 460234,
+        "read_s": 0.009161624941043556,
+        "to_events_s": 3.979604084044695,
+        "reconstruct_s": 17.344907416030765,
+        "reconstruct_us_per_row": 37.68714918070104,
+        "matrix_mib": 52.66960144042969,
+        "peak_rss_mib": 559.84375
+      }
+    },
+    {
+      "fraction": 0.5,
+      "generate": {
+        "rows": 922328,
+        "generate_s": 4.186907875002362,
+        "write_and_hash_s": 0.5078552910126746,
+        "output_mib": 15.128005027770996,
+        "peak_rss_mib": 880.59375
+      },
+      "reconstruct": {
+        "rows": 922328,
+        "read_s": 0.015489457990042865,
+        "to_events_s": 8.310949792037718,
+        "reconstruct_s": 45.45912379201036,
+        "reconstruct_us_per_row": 49.28737259631103,
+        "matrix_mib": 105.55206298828125,
+        "peak_rss_mib": 993.984375
+      }
+    },
+    {
+      "fraction": 1.0,
+      "generate": {
+        "rows": 1834753,
+        "generate_s": 9.12164045800455,
+        "write_and_hash_s": 0.8677755839889869,
+        "output_mib": 29.292006492614746,
+        "peak_rss_mib": 1378.421875
+      },
+      "reconstruct": {
+        "rows": 1834753,
+        "read_s": 0.028036541887558997,
+        "to_events_s": 16.81776270805858,
+        "reconstruct_s": 97.03038666700013,
+        "reconstruct_us_per_row": 52.88471345570773,
+        "matrix_mib": 209.97081756591797,
+        "peak_rss_mib": 1637.484375
+      }
+    }
+  ]
+}

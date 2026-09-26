@@ -1,0 +1,183 @@
+{
+  "model_version": "lr-f1-6f0ebad8fcc7",
+  "policy_version": "pol-82d9e16668ae",
+  "namespace": "replay:demo-1790289718",
+  "cutoff_day": 140,
+  "setup": {
+    "bootstrap_events": 321167,
+    "bootstrap_seconds": 14.07,
+    "excluded_already_decided_by_other_stream": [],
+    "stale_replay_rows_removed": 0
+  },
+  "readiness_at_start": {
+    "database": true,
+    "scorer": true,
+    "feature_store": true,
+    "pipeline": {
+      "namespace": "replay:demo-1790289718",
+      "outbox_backlog": 0,
+      "oldest_unpublished_age_s": null,
+      "broker_view_age_ms": 214,
+      "worker_heartbeat_age_s": 0.987663,
+      "consumer_lag_events": 0,
+      "reject": null
+    },
+    "degraded": [],
+    "status": "ready"
+  },
+  "sequence": {
+    "elapsed_s": 17.97,
+    "decision_to_applied_observed_ms": {
+      "p50": 50.1,
+      "max": 59.6
+    },
+    "decisions": 300,
+    "feature_vectors_equal_offline": 300,
+    "feature_vectors_different": 0,
+    "differences_by_feature": {},
+    "scores_changed": 0,
+    "max_abs_score_change": 0.0,
+    "median_abs_score_change_when_changed": 0.0,
+    "action_changes": {},
+    "reason_codes": {
+      "SCORE_BELOW_REVIEW_THRESHOLD": 298,
+      "SCORE_AT_OR_ABOVE_REVIEW_THRESHOLD": 2
+    },
+    "sequence_members_missing_from_zsets": 0,
+    "customers_with_repeat_transactions": 6,
+    "max_transactions_per_customer": 3,
+    "repeat_customer_trace": [
+      {
+        "customer": "C000330",
+        "decisions": [
+          {
+            "transaction_id": "TX001403589",
+            "stored_cust_txn_count_1d": 7,
+            "expected_cust_txn_count_1d": 7.0
+          },
+          {
+            "transaction_id": "TX001403613",
+            "stored_cust_txn_count_1d": 8,
+            "expected_cust_txn_count_1d": 8.0
+          }
+        ]
+      },
+      {
+        "customer": "C000591",
+        "decisions": [
+          {
+            "transaction_id": "TX001403608",
+            "stored_cust_txn_count_1d": 4,
+            "expected_cust_txn_count_1d": 4.0
+          },
+          {
+            "transaction_id": "TX001403844",
+            "stored_cust_txn_count_1d": 5,
+            "expected_cust_txn_count_1d": 5.0
+          }
+        ]
+      },
+      {
+        "customer": "C001685",
+        "decisions": [
+          {
+            "transaction_id": "TX001403627",
+            "stored_cust_txn_count_1d": 3,
+            "expected_cust_txn_count_1d": 3.0
+          },
+          {
+            "transaction_id": "TX001403711",
+            "stored_cust_txn_count_1d": 4,
+            "expected_cust_txn_count_1d": 4.0
+          }
+        ]
+      },
+      {
+        "customer": "C001547",
+        "decisions": [
+          {
+            "transaction_id": "TX001403633",
+            "stored_cust_txn_count_1d": 1,
+            "expected_cust_txn_count_1d": 1.0
+          },
+          {
+            "transaction_id": "TX001403785",
+            "stored_cust_txn_count_1d": 2,
+            "expected_cust_txn_count_1d": 2.0
+          }
+        ]
+      },
+      {
+        "customer": "C002658",
+        "decisions": [
+          {
+            "transaction_id": "TX001403652",
+            "stored_cust_txn_count_1d": 3,
+            "expected_cust_txn_count_1d": 3.0
+          },
+          {
+            "transaction_id": "TX001403857",
+            "stored_cust_txn_count_1d": 4,
+            "expected_cust_txn_count_1d": 4.0
+          }
+        ]
+      },
+      {
+        "customer": "C004837",
+        "decisions": [
+          {
+            "transaction_id": "TX001403668",
+            "stored_cust_txn_count_1d": 6,
+            "expected_cust_txn_count_1d": 6.0
+          },
+          {
+            "transaction_id": "TX001403789",
+            "stored_cust_txn_count_1d": 7,
+            "expected_cust_txn_count_1d": 7.0
+          },
+          {
+            "transaction_id": "TX001403804",
+            "stored_cust_txn_count_1d": 8,
+            "expected_cust_txn_count_1d": 8.0
+          }
+        ]
+      }
+    ]
+  },
+  "burst": {
+    "worker_delay_ms_per_event": 20.0,
+    "concurrency": 20,
+    "send_elapsed_s": 4.18,
+    "drain_elapsed_s": 30.22,
+    "http_status": {
+      "201": 1000
+    },
+    "decisions": 1000,
+    "feature_vectors_equal_offline": 872,
+    "feature_vectors_different": 128,
+    "differences_by_feature": {
+      "cust_txn_count_1d": 93,
+      "cust_txn_count_7d": 93,
+      "cust_txn_count_30d": 93,
+      "cust_amount_mean_7d": 93,
+      "cust_amount_mean_30d": 93,
+      "amount_to_cust_mean_30d": 93,
+      "secs_since_prev_cust_txn": 93,
+      "cust_txn_count_1h": 55,
+      "term_txn_count_1d": 38,
+      "term_txn_count_7d": 38
+    },
+    "scores_changed": 128,
+    "max_abs_score_change": 0.002119028910015662,
+    "median_abs_score_change_when_changed": 8.688057671122512e-05,
+    "action_changes": {},
+    "reason_codes": {
+      "SCORE_BELOW_REVIEW_THRESHOLD": 991,
+      "PIPELINE_DEGRADED": 253,
+      "CONSUMER_LAG_UNKNOWN": 253,
+      "SCORE_AT_OR_ABOVE_REVIEW_THRESHOLD": 7,
+      "SCORE_AT_OR_ABOVE_DECLINE_THRESHOLD": 2,
+      "COLD_START_CUSTOMER": 1
+    }
+  }
+}

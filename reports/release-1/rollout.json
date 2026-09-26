@@ -1,0 +1,98 @@
+{
+  "release": "release-1",
+  "registry_versions": {
+    "baseline": "1",
+    "candidate": "4"
+  },
+  "steps": [
+    {
+      "step": "1 start on baseline",
+      "transaction_id": "TX001403582",
+      "http": 201,
+      "api_model_at_startup": {
+        "model_version": "lr-f1-6f0ebad8fcc7",
+        "policy_version": "pol-82d9e16668ae",
+        "uri": "models:/fraud-risk-f1@production",
+        "registry_ref": "fraud-risk-f1/1",
+        "source": "registry"
+      },
+      "stored": {
+        "model_version": "lr-f1-6f0ebad8fcc7",
+        "policy_version": "pol-82d9e16668ae",
+        "model_registry_ref": "fraud-risk-f1/1",
+        "action": "approve",
+        "score": 0.001084294523121817
+      },
+      "expected_model": "lr-f1-6f0ebad8fcc7",
+      "as_expected": true
+    },
+    {
+      "step": "2 alias -> candidate, no restart",
+      "transaction_id": "TX001403583",
+      "http": 201,
+      "api_model_at_startup": {
+        "model_version": "lr-f1-6f0ebad8fcc7",
+        "policy_version": "pol-82d9e16668ae",
+        "uri": "models:/fraud-risk-f1@production",
+        "registry_ref": "fraud-risk-f1/1",
+        "source": "registry"
+      },
+      "stored": {
+        "model_version": "lr-f1-6f0ebad8fcc7",
+        "policy_version": "pol-82d9e16668ae",
+        "model_registry_ref": "fraud-risk-f1/1",
+        "action": "approve",
+        "score": 0.010208363307616446
+      },
+      "expected_model": "lr-f1-6f0ebad8fcc7",
+      "as_expected": true
+    },
+    {
+      "step": "3 after restart",
+      "transaction_id": "TX001403584",
+      "http": 201,
+      "api_model_at_startup": {
+        "model_version": "xgb-f1-1f168d371c42",
+        "policy_version": "pol-c51799ac9da6",
+        "uri": "models:/fraud-risk-f1@production",
+        "registry_ref": "fraud-risk-f1/4",
+        "source": "registry"
+      },
+      "stored": {
+        "model_version": "xgb-f1-1f168d371c42",
+        "policy_version": "pol-c51799ac9da6",
+        "model_registry_ref": "fraud-risk-f1/4",
+        "action": "approve",
+        "score": 0.0059526036493480206
+      },
+      "expected_model": "xgb-f1-1f168d371c42",
+      "as_expected": true
+    },
+    {
+      "step": "4 rollback: alias -> baseline, restart",
+      "transaction_id": "TX001403585",
+      "http": 201,
+      "api_model_at_startup": {
+        "model_version": "lr-f1-6f0ebad8fcc7",
+        "policy_version": "pol-82d9e16668ae",
+        "uri": "models:/fraud-risk-f1@production",
+        "registry_ref": "fraud-risk-f1/1",
+        "source": "registry"
+      },
+      "stored": {
+        "model_version": "lr-f1-6f0ebad8fcc7",
+        "policy_version": "pol-82d9e16668ae",
+        "model_registry_ref": "fraud-risk-f1/1",
+        "action": "approve",
+        "score": 0.010359216202964497
+      },
+      "expected_model": "lr-f1-6f0ebad8fcc7",
+      "as_expected": true
+    }
+  ],
+  "final_production_alias": {
+    "version": "1",
+    "role": "baseline"
+  },
+  "note": "local release on simulated data; not a production deployment"
+}

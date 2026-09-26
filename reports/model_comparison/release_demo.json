@@ -1,0 +1,61 @@
+{
+  "registered_versions": {
+    "lr-f1-6f0ebad8fcc7": "1",
+    "xgb-f1-fcf93e5d253d": "3"
+  },
+  "promoted": {
+    "status": 201,
+    "decision": {
+      "transaction_id": "TX001403580",
+      "action": "approve",
+      "score": 0.0033627909142524004,
+      "reason_codes": [
+        "SCORE_BELOW_REVIEW_THRESHOLD"
+      ],
+      "model_version": "xgb-f1-fcf93e5d253d",
+      "feature_version": "f1",
+      "policy_version": "pol-1e442fb0f055",
+      "model_registry_ref": "fraud-risk-f1/3",
+      "event_time": "2025-05-21T00:03:49Z",
+      "received_at": "2026-09-25T00:56:46.173659Z",
+      "decision_time": "2026-09-25T00:56:46.182518Z",
+      "idempotent_replay": false
+    },
+    "model": {
+      "model_version": "xgb-f1-fcf93e5d253d",
+      "policy_version": "pol-1e442fb0f055",
+      "uri": "models:/fraud-risk-f1@production",
+      "registry_ref": "fraud-risk-f1/3",
+      "source": "registry"
+    }
+  },
+  "rolled_back": {
+    "status": 201,
+    "decision": {
+      "transaction_id": "TX001403581",
+      "action": "approve",
+      "score": 0.0017584434961384716,
+      "reason_codes": [
+        "SCORE_BELOW_REVIEW_THRESHOLD"
+      ],
+      "model_version": "lr-f1-6f0ebad8fcc7",
+      "feature_version": "f1",
+      "policy_version": "pol-82d9e16668ae",
+      "model_registry_ref": "fraud-risk-f1/1",
+      "event_time": "2025-05-21T00:04:39Z",
+      "received_at": "2026-09-25T00:56:46.237650Z",
+      "decision_time": "2026-09-25T00:56:46.244462Z",
+      "idempotent_replay": false
+    },
+    "model": {
+      "model_version": "lr-f1-6f0ebad8fcc7",
+      "policy_version": "pol-82d9e16668ae",
+      "uri": "models:/fraud-risk-f1@production",
+      "registry_ref": "fraud-risk-f1/1",
+      "source": "registry"
+    }
+  },
+  "final_alias": {
+    "production": "1"
+  }
+}

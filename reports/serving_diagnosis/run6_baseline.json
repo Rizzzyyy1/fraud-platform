@@ -1,0 +1,1360 @@
+{
+  "machine": {
+    "platform": "macOS-15.2-arm64-arm-64bit-Mach-O",
+    "cpu": "Apple M1",
+    "cores": "8",
+    "memory_gib": 16.0,
+    "python": "3.14.0",
+    "container_runtime": "Colima VM: 6 CPU, 8 GiB",
+    "compose_limits": {
+      "postgres": "512 MiB",
+      "redis": "512 MiB (maxmemory 384 MiB)",
+      "kafka": "1 GiB (heap 512 MiB)"
+    }
+  },
+  "model_version": "lr-f1-6f0ebad8fcc7",
+  "policy_version": "pol-82d9e16668ae",
+  "dataset": "sim-v2 (synthetic), transactions decided after day 140 in decision order",
+  "method": {
+    "load": "open loop",
+    "warmup_s": 10.0,
+    "duration_s": 60.0,
+    "max_in_flight": 64,
+    "api_processes": 1,
+    "client": "httpx AsyncClient, same machine"
+  },
+  "setup": {
+    "bootstrap_events": 321167,
+    "bootstrap_seconds": 14.14,
+    "excluded_already_decided_by_other_stream": [
+      "TX001403579",
+      "TX001403580",
+      "TX001403581"
+    ],
+    "stale_replay_rows_removed": 0
+  },
+  "db_clock_minus_host_clock_ms": 34.23,
+  "readiness_at_start": {
+    "database": true,
+    "scorer": true,
+    "model": {
+      "model_version": "lr-f1-6f0ebad8fcc7",
+      "policy_version": "pol-82d9e16668ae",
+      "uri": "models:/fraud-risk-f1@production",
+      "registry_ref": "fraud-risk-f1/1",
+      "source": "registry"
+    },
+    "feature_store": true,
+    "pipeline": {
+      "namespace": "replay:bench-1790342556",
+      "outbox_backlog": 0,
+      "oldest_unpublished_age_s": null,
+      "broker_view_age_ms": 235,
+      "worker_heartbeat_age_s": 0.292329,
+      "consumer_lag_events": 0,
+      "unknown_state_for_s": null,
+      "reject": null
+    },
+    "degraded": [],
+    "status": "ready"
+  },
+  "environment": {
+    "code_revision": "e622374ad4183463ceca496e016c39bab3dd7bfe+dirty",
+    "python": "3.14.0",
+    "packages": {
+      "xgboost": "3.4.1",
+      "numpy": "2.5.3",
+      "scikit-learn": "1.9.1",
+      "fastapi": "0.141.1",
+      "uvicorn": "0.53.0",
+      "redis": "8.1.0",
+      "psycopg": "3.3.6",
+      "psycopg-pool": "3.3.3",
+      "confluent-kafka": "2.15.1",
+      "prometheus-client": "0.26.0",
+      "httpx": "0.28.1"
+    },
+    "host_load_before": "{ 4.83 5.60 7.88 }",
+    "process_layout": {
+      "api": "1 uvicorn process, 1 event loop",
+      "publisher": 1,
+      "worker": 1
+    },
+    "omp_num_threads": null
+  },
+  "namespace": "replay:bench-1790342556",
+  "idle_memory": {
+    "docker": {
+      "fraud-platform-kafka-1": "686.1MiB / 1GiB",
+      "fraud-platform-redis-1": "310.4MiB / 512MiB",
+      "fraud-platform-postgres-1": "152.1MiB / 512MiB"
+    },
+    "processes_rss_mib": {
+      "api": 258.9,
+      "publisher": 53.0,
+      "worker": 62.3
+    }
+  },
+  "levels": [
+    {
+      "target_rps": 100.0,
+      "scheduled_total": 6997,
+      "sent_total": 6997,
+      "measured_window": {
+        "scheduled": 5997,
+        "completed_with_response": 5997,
+        "timed_out": 0,
+        "failed_http_or_rejected": 0,
+        "achieved_completion_rps": 100.0,
+        "outcomes": {
+          "model_scored": 5995,
+          "degraded_review_no_score": 2
+        }
+      },
+      "scheduling_delay_ms": {
+        "p50": 0.47,
+        "p95": 1.83,
+        "p99": 16.73,
+        "max": 432.7,
+        "mean": 2.35
+      },
+      "late_starts_over_50ms": 40,
+      "latency_ms_all_responses": {
+        "p50": 7.75,
+        "p95": 17.5,
+        "p99": 103.62,
+        "max": 457.52,
+        "mean": 11.09
+      },
+      "latency_ms_model_scored_only": {
+        "p50": 7.75,
+        "p95": 17.46,
+        "p99": 102.72,
+        "max": 457.52,
+        "mean": 11.04
+      },
+      "memory_during_load": {
+        "docker": {
+          "fraud-platform-kafka-1": "686MiB / 1GiB",
+          "fraud-platform-redis-1": "310.7MiB / 512MiB",
+          "fraud-platform-postgres-1": "172.8MiB / 512MiB"
+        },
+        "processes_rss_mib": {
+          "api": 257.9,
+          "publisher": 29.4,
+          "worker": 36.0
+        }
+      },
+      "api_stages": {
+        "db_pool_wait": {
+          "count": 14063,
+          "mean_ms": 0.208,
+          "p50_le_ms": 0.1,
+          "p95_le_ms": 0.1,
+          "p99_le_ms": 2.5
+        },
+        "db_precheck": {
+          "count": 6997,
+          "mean_ms": 2.099,
+          "p50_le_ms": 2.5,
+          "p95_le_ms": 5.0,
+          "p99_le_ms": 25.0
+        },
+        "redis_call": {
+          "count": 6995,
+          "mean_ms": 1.959,
+          "p50_le_ms": 2.5,
+          "p95_le_ms": 5.0,
+          "p99_le_ms": 10.0
+        },
+        "feature_read": {
+          "count": 6997,
+          "mean_ms": 2.109,
+          "p50_le_ms": 2.5,
+          "p95_le_ms": 5.0,
+          "p99_le_ms": 10.0
+        },
+        "feature_compute": {
+          "count": 6995,
+          "mean_ms": 0.026,
+          "p50_le_ms": 0.1,
+          "p95_le_ms": 0.1,
+          "p99_le_ms": 0.1
+        },
+        "model_input": {
+          "count": 6995,
+          "mean_ms": 0.014,
+          "p50_le_ms": 0.1,
+          "p95_le_ms": 0.1,
+          "p99_le_ms": 0.1
+        },
+        "inference": {
+          "count": 6995,
+          "mean_ms": 0.087,
+          "p50_le_ms": 0.1,
+          "p95_le_ms": 0.25,
+          "p99_le_ms": 0.25
+        },
+        "inference_cpu": {
+          "count": 6995,
+          "mean_ms": 0.088,
+          "p50_le_ms": 0.1,
+          "p95_le_ms": 0.25,
+          "p99_le_ms": 0.25
+        },
+        "policy": {
+          "count": 6997,
+          "mean_ms": 0.002,
+          "p50_le_ms": 0.1,
+          "p95_le_ms": 0.1,
+          "p99_le_ms": 0.1
+        },
+        "db_insert": {
+          "count": 6997,
+          "mean_ms": 3.197,
+          "p50_le_ms": 2.5,
+          "p95_le_ms": 10.0,
+          "p99_le_ms": 25.0
+        },
+        "handler": {
+          "count": 6997,
+          "mean_ms": 7.663,
+          "p50_le_ms": 10.0,
+          "p95_le_ms": 25.0,
+          "p99_le_ms": 100.0
+        },
+        "request_total": {
+          "count": 6997,
+          "mean_ms": 7.993,
+          "p50_le_ms": 10.0,
+          "p95_le_ms": 25.0,
+          "p99_le_ms": 100.0
+        },
+        "event_loop_lag": {
+          "count": 1395,
+          "mean_ms": 0.296,
+          "p50_le_ms": 0.1,
+          "p95_le_ms": 1.0,
+          "p99_le_ms": 2.5
+        }
+      },
+      "workload_sha256": "edbc613885e035aea6f1a6c138dd6cfa92c414e7c58200303dc3c2e2d6b4c5fa",
+      "pipeline": {
+        "delay": {
+          "decision_to_applied_ms_host_clock": {
+            "p50": 55.6,
+            "p95": 120.78,
+            "p99": 244.11,
+            "max": 406.43,
+            "mean": 61.5
+          },
+          "outbox_created_to_published_ms_db_clock": {
+            "p50": 33.81,
+            "p95": 60.92,
+            "p99": 69.69,
+            "max": 182.3,
+            "mean": 34.38
+          },
+          "applied": 5997,
+          "of": 5997
+        },
+        "unapplied_at_load_end": 0,
+        "drain_seconds_after_load": 0.06,
+        "unapplied_after_drain": 0,
+        "max_outbox_backlog_during_load": 7,
+        "max_worker_lag_during_load": 0,
+        "max_redis_used_mb": 289.7,
+        "timeline": [
+          {
+            "t_s": 0.0,
+            "outbox_backlog": 0,
+            "worker_lag": 0,
+            "redis_used_mb": 289.1,
+            "cpu_percent": {
+              "api": 0.7,
+              "publisher": 1.5,
+              "worker": 0.2
+            },
+            "threads": {
+              "api": 8,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 1.1,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.1,
+            "cpu_percent": {
+              "api": 22.8,
+              "publisher": 1.4,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 2.1,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 28.2,
+              "publisher": 1.8,
+              "worker": 8.1
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 3.2,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 20.5,
+              "publisher": 1.3,
+              "worker": 5.0
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 4.4,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 23.5,
+              "publisher": 1.5,
+              "worker": 5.9
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 5.4,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 22.3,
+              "publisher": 1.5,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 6.5,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 25.0,
+              "publisher": 1.4,
+              "worker": 5.8
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 7.5,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 23.5,
+              "publisher": 1.5,
+              "worker": 6.2
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 8.6,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 27.6,
+              "publisher": 1.8,
+              "worker": 7.9
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 9.6,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 24.3,
+              "publisher": 1.3,
+              "worker": 5.8
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 10.7,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.2,
+            "cpu_percent": {
+              "api": 23.7,
+              "publisher": 1.5,
+              "worker": 5.8
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 11.7,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 22.8,
+              "publisher": 1.5,
+              "worker": 5.6
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 12.7,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 26.2,
+              "publisher": 1.7,
+              "worker": 7.0
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 13.8,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 23.7,
+              "publisher": 1.6,
+              "worker": 6.0
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 14.9,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 25.5,
+              "publisher": 1.5,
+              "worker": 6.7
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 15.9,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 24.0,
+              "publisher": 1.5,
+              "worker": 5.7
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 16.9,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 24.7,
+              "publisher": 1.5,
+              "worker": 5.6
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 18.0,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 24.9,
+              "publisher": 1.4,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 19.1,
+            "outbox_backlog": 0,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 8.1,
+              "publisher": 1.0,
+              "worker": 1.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 20.2,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.3,
+            "cpu_percent": {
+              "api": 25.3,
+              "publisher": 1.3,
+              "worker": 7.5
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 21.2,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 25.7,
+              "publisher": 1.4,
+              "worker": 6.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 22.3,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 22.9,
+              "publisher": 1.4,
+              "worker": 5.4
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 23.3,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 21.4,
+              "publisher": 1.2,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 24.4,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 22.8,
+              "publisher": 1.2,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 25.4,
+            "outbox_backlog": 0,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 22.4,
+              "publisher": 1.5,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 26.5,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 26.5,
+              "publisher": 1.6,
+              "worker": 6.7
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 27.5,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 26.0,
+              "publisher": 1.6,
+              "worker": 6.5
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 28.6,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 23.2,
+              "publisher": 1.3,
+              "worker": 5.8
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 29.7,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 23.0,
+              "publisher": 1.6,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 30.7,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 27.7,
+              "publisher": 1.2,
+              "worker": 5.8
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 31.8,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 24.1,
+              "publisher": 1.4,
+              "worker": 5.8
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 32.8,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 28.8,
+              "publisher": 1.6,
+              "worker": 8.1
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 33.9,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 24.4,
+              "publisher": 1.4,
+              "worker": 6.1
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 34.9,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 22.6,
+              "publisher": 1.2,
+              "worker": 5.4
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 36.0,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.4,
+            "cpu_percent": {
+              "api": 23.7,
+              "publisher": 1.4,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 37.0,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 24.0,
+              "publisher": 1.4,
+              "worker": 6.1
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 38.1,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 23.4,
+              "publisher": 1.3,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 39.1,
+            "outbox_backlog": 7,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 28.3,
+              "publisher": 1.8,
+              "worker": 7.9
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 40.2,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 24.3,
+              "publisher": 1.4,
+              "worker": 5.9
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 41.3,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 20.8,
+              "publisher": 1.4,
+              "worker": 5.0
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 42.3,
+            "outbox_backlog": 0,
+            "worker_lag": 0,
+            "redis_used_mb": 289.5,
+            "cpu_percent": {
+              "api": 28.6,
+              "publisher": 1.5,
+              "worker": 6.2
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 43.4,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 25.7,
+              "publisher": 1.5,
+              "worker": 6.1
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 44.4,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 22.5,
+              "publisher": 1.2,
+              "worker": 5.2
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 45.5,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 27.9,
+              "publisher": 1.8,
+              "worker": 8.4
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 46.5,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 23.4,
+              "publisher": 1.2,
+              "worker": 6.1
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 47.6,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 22.5,
+              "publisher": 1.2,
+              "worker": 5.2
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 48.6,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 22.3,
+              "publisher": 1.5,
+              "worker": 5.6
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 49.7,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 23.8,
+              "publisher": 1.2,
+              "worker": 6.1
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 50.7,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 23.0,
+              "publisher": 1.3,
+              "worker": 5.4
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 51.7,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 28.8,
+              "publisher": 1.8,
+              "worker": 7.8
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 52.8,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 23.4,
+              "publisher": 1.5,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 53.8,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 23.0,
+              "publisher": 1.2,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 54.9,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.6,
+            "cpu_percent": {
+              "api": 28.2,
+              "publisher": 1.4,
+              "worker": 5.8
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 55.9,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 23.2,
+              "publisher": 1.5,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 57.0,
+            "outbox_backlog": 2,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 25.1,
+              "publisher": 1.5,
+              "worker": 5.8
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 58.0,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 33.6,
+              "publisher": 2.1,
+              "worker": 9.0
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 59.1,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 23.9,
+              "publisher": 1.3,
+              "worker": 6.2
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 60.1,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 23.4,
+              "publisher": 1.4,
+              "worker": 6.2
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 61.2,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 22.5,
+              "publisher": 1.2,
+              "worker": 5.2
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 62.2,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 22.9,
+              "publisher": 1.3,
+              "worker": 5.2
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 63.2,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 24.0,
+              "publisher": 1.2,
+              "worker": 5.2
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 64.3,
+            "outbox_backlog": 5,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 30.6,
+              "publisher": 1.8,
+              "worker": 8.6
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 65.3,
+            "outbox_backlog": 1,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 23.7,
+              "publisher": 1.3,
+              "worker": 5.5
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 66.4,
+            "outbox_backlog": 3,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 24.6,
+              "publisher": 1.4,
+              "worker": 5.3
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 67.4,
+            "outbox_backlog": 6,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 24.7,
+              "publisher": 1.4,
+              "worker": 5.4
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 68.5,
+            "outbox_backlog": 4,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 23.0,
+              "publisher": 1.4,
+              "worker": 5.5
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          },
+          {
+            "t_s": 69.5,
+            "outbox_backlog": 0,
+            "worker_lag": 0,
+            "redis_used_mb": 289.7,
+            "cpu_percent": {
+              "api": 23.9,
+              "publisher": 1.2,
+              "worker": 5.5
+            },
+            "threads": {
+              "api": 7,
+              "publisher": 5,
+              "worker": 15
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "decision_identities": [
+    {
+      "model_version": "lr-f1-6f0ebad8fcc7",
+      "policy_version": "pol-82d9e16668ae",
+      "model_registry_ref": "fraud-risk-f1/1",
+      "decisions": 6997
+    }
+  ],
+  "redis_memory": {
+    "maxmemory_mb": 384.0,
+    "before_bootstrap": "145.82M",
+    "after_bootstrap": "289.12M",
+    "after_run": "289.79M",
+    "peak_sampled_mb": 289.7,
+    "server_lifetime_peak": "384.18M"
+  }
+}

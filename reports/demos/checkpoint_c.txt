@@ -1,0 +1,49 @@
+model  lr-f1-6f0ebad8fcc7   policy pol-82d9e16668ae (review >= 0.0378, decline >= 0.07451167222293634)
+data   sim-v2 (synthetic)  rows before test period: 1,533,743  cutoff = day 140
+redis  bootstrap: 321,167 events available in [cutoff - 32 d, cutoff) applied in 10.7s {'applied': 321167}
+reset  removed earlier demo rows for TX001403579
+
+ready  {'database': True, 'scorer': True, 'feature_store': True}
+
+POST   {"transaction_id": "TX001403579", "customer_id": "C000427", "terminal_id": "T003784", "amount_minor": 997, "currency": "USD", "event_time": "2025-05-21T00:03:36.000000Z"}
+-> 201 {
+  "transaction_id": "TX001403579",
+  "action": "approve",
+  "score": 0.001351986746592733,
+  "reason_codes": [
+    "SCORE_BELOW_REVIEW_THRESHOLD"
+  ],
+  "model_version": "lr-f1-6f0ebad8fcc7",
+  "feature_version": "f1",
+  "policy_version": "pol-82d9e16668ae",
+  "event_time": "2025-05-21T00:03:36Z",
+  "received_at": "2026-09-24T20:10:28.087827Z",
+  "decision_time": "2026-09-24T20:10:28.092305Z",
+  "idempotent_replay": false
+}
+
+stored feature vector (as used):
+  amount_minor                 997
+  hour_of_day_utc              0
+  day_of_week_utc              2
+  cust_txn_count_1h            0
+  cust_txn_count_1d            5
+  cust_txn_count_7d            19
+  cust_txn_count_30d           108
+  cust_amount_mean_7d          2528.0
+  cust_amount_mean_30d         2675.4814814814813
+  amount_to_cust_mean_30d      0.3726432071762784
+  secs_since_prev_cust_txn     19787.0
+  cust_has_history_30d         1
+  cust_terminal_is_new_30d     0
+  term_txn_count_1d            1
+  term_txn_count_7d            10
+stored versions: model=lr-f1-6f0ebad8fcc7 feature=f1 policy=pol-82d9e16668ae; outbox events=1
+freshness: watermark_us=1747785568000000 history_complete=True customer_meta={'applied_count': 114, 'last_event_id': 'TX001402744', 'last_applied_at_us': 1747766029474931}
+
+stored vector equals independent in-memory reconstruction: True
+model score recomputed from that reconstruction: 0.001351986746592733 (API returned 0.001351986746592733)
+
+identical retry -> 200 idempotent_replay=True same persisted fields: True
+conflicting retry (amount + 1) -> 409 {'error': 'idempotency_conflict', 'transaction_id': 'TX001403579'}
+rows for TX001403579: decisions=1 outbox=1

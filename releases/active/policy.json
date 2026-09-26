@@ -1,0 +1,20 @@
+{
+  "decline_threshold": null,
+  "derivation": {
+    "code_revision": "e622374ad4183463ceca496e016c39bab3dd7bfe",
+    "held_out_evaluation": "none; the test period is not reused",
+    "method": "release-1 method: top-1% score on the selection window, no labels",
+    "review_capacity_target": 0.01,
+    "selection_days": [
+      123,
+      146
+    ],
+    "supersedes_for_serving": "pol-82d9e16668ae (frozen; unchanged)",
+    "type": "review-only (automatic decline disabled)"
+  },
+  "derived_for_model": "lr-f1-6f0ebad8fcc7",
+  "integrity_sha256": "6164cb21826dd450e40c3bbba9316e4ed0e650bbbc9b4c9aece0962356b2ec67",
+  "policy_version": "pol-6164cb21826d",
+  "review_threshold": 0.03814305475952357,
+  "schema": "fraudplat.policy/v1"
+}

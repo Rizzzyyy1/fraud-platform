@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-09-25",
+  "environment": "clean isolated copy (separate Compose project and ports)",
+  "procedure": "sentinel Redis keys in `live:` and `replay:sentinel-other:` plus that namespace's topics were created, then `make dashboard-reset` was run",
+  "old_namespace": "replay:dashboard-1790349240",
+  "new_namespace": "replay:dashboard-1790349694",
+  "old_redis_keys_before": 660325,
+  "old_redis_keys_after": 0,
+  "sentinel_other_namespace_kept": true,
+  "sentinel_live_kept": true,
+  "old_topics_removed": true,
+  "other_namespace_topics_kept": true,
+  "old_decisions_kept_in_postgres": 2220
+}

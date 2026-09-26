@@ -1,0 +1,58 @@
+# Model comparison protocol, declared before running. Feature version f1 only; no simulator or
+# feature changes. The final test period (day >= 153) is never loaded.
+dataset_dir = "data/raw/sim-v2"
+derived_root = "data/derived"
+artifacts_root = "artifacts"
+report_dir = "reports/model_comparison"
+
+burn_in_days = 30
+test_start_day = 153
+# Temporal backtests (development evidence). For cutoff c:
+#   fit window         [burn_in, c - label_gap - calibration_days)   labels known at c
+#   calibration window [c - label_gap - calibration_days, c - label_gap)   labels known at c
+#   evaluation window  [c, c + eval_days)
+fold_cutoff_days = [84, 107, 130]
+label_gap_days = 30
+calibration_days = 10
+eval_days = 23
+seed = 0
+
+# Policy derivation on the calibration window (fixed thresholds, then applied forward).
+review_budget = 0.01
+decline_min_precision = 0.90
+decline_min_count = 20
+
+# Selection rule (declared in advance):
+#   primary metric = mean average precision over the three evaluation windows;
+#   within a family, the configuration with the highest mean AP is its representative;
+#   XGBoost replaces logistic regression only if all hold:
+#     mean AP gain >= xgboost_min_ap_gain, AP higher in >= xgboost_min_fold_wins folds,
+#     serving constraints met (validated non-pickle artifact, single-row p99 <= max, size <= max).
+primary_metric = "mean_eval_average_precision"
+xgboost_min_ap_gain = 0.02
+xgboost_min_fold_wins = 2
+max_single_row_p99_us = 1000
+max_artifact_bytes = 10_000_000
+
+[lr]  # search budget: 10 configurations x 3 folds
+c_grid = [0.0001, 0.001, 0.01, 0.1, 1.0]
+class_weights = ["none", "balanced"]
+nullable = ["cust_amount_mean_7d", "cust_amount_mean_30d", "amount_to_cust_mean_30d",
+            "secs_since_prev_cust_txn"]
+log1p = ["amount_minor", "cust_txn_count_1h", "cust_txn_count_1d", "cust_txn_count_7d",
+         "cust_txn_count_30d", "cust_amount_mean_7d", "cust_amount_mean_30d",
+         "amount_to_cust_mean_30d", "secs_since_prev_cust_txn", "term_txn_count_1d",
+         "term_txn_count_7d"]
+
+[xgb]  # search budget: 8 configurations x 3 folds
+max_depth = [3, 6]
+n_estimators = [200, 500]
+scale_pos_weight = [1.0, 10.0]
+learning_rate = 0.1
+subsample = 0.8
+colsample_bytree = 0.8
+min_child_weight = 1.0
+nthread = 6
+
+[mlflow]
+experiment = "fraud-f1-model-comparison"

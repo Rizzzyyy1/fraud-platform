@@ -1,0 +1,127 @@
+{
+  "criterion": "100 rps sustained 60 s: p95 <= 100 ms, p99 <= 200 ms, error rate <= 0.1%",
+  "recorded_candidate_runs": [
+    {
+      "run": "candidate run 1",
+      "file": "serving_benchmark_run1.json",
+      "measured_seconds": 60,
+      "achieved_rps": 80.5,
+      "outcomes": {
+        "model_scored": 5982,
+        "degraded_review_no_score": 15
+      },
+      "p50_ms": 377.19,
+      "p95_ms": 2278.79,
+      "p99_ms": 3756.38,
+      "late_starts_over_50ms": 4527,
+      "error_rate": 0.0,
+      "passes_criteria": false
+    },
+    {
+      "run": "candidate run 2",
+      "file": "serving_benchmark_run2.json",
+      "measured_seconds": 60,
+      "achieved_rps": 82.1,
+      "outcomes": {
+        "model_scored": 5981,
+        "degraded_review_no_score": 15,
+        "client_error_ReadError": 1
+      },
+      "p50_ms": 490.51,
+      "p95_ms": 2355.51,
+      "p99_ms": 3660.21,
+      "late_starts_over_50ms": 5997,
+      "error_rate": 0.00017,
+      "passes_criteria": false
+    },
+    {
+      "run": "candidate run 3",
+      "file": "serving_benchmark_run3.json",
+      "measured_seconds": 60,
+      "achieved_rps": 86.7,
+      "outcomes": {
+        "model_scored": 5967,
+        "degraded_review_no_score": 30
+      },
+      "p50_ms": 337.54,
+      "p95_ms": 2047.53,
+      "p99_ms": 3323.4,
+      "late_starts_over_50ms": 4703,
+      "error_rate": 0.0,
+      "passes_criteria": false
+    },
+    {
+      "run": "candidate run 4",
+      "file": "serving_benchmark_run4.json",
+      "measured_seconds": 60,
+      "achieved_rps": 87.5,
+      "outcomes": {
+        "model_scored": 5972,
+        "degraded_review_no_score": 25
+      },
+      "p50_ms": 356.66,
+      "p95_ms": 2086.46,
+      "p99_ms": 3568.95,
+      "late_starts_over_50ms": 4963,
+      "error_rate": 0.0,
+      "passes_criteria": false
+    }
+  ],
+  "diagnostic_probes": [
+    {
+      "run": "candidate probe (20 s)",
+      "file": "serving_probe_20s_omp_default.json",
+      "measured_seconds": 20,
+      "achieved_rps": 100.0,
+      "outcomes": {
+        "model_scored": 1997
+      },
+      "p50_ms": 7.16,
+      "p95_ms": 13.21,
+      "p99_ms": 119.44,
+      "late_starts_over_50ms": 28,
+      "error_rate": 0.0,
+      "passes_criteria": true
+    },
+    {
+      "run": "candidate probe (20 s, OMP_NUM_THREADS=1)",
+      "file": "serving_probe_20s_omp1.json",
+      "measured_seconds": 20,
+      "achieved_rps": 100.0,
+      "outcomes": {
+        "model_scored": 1997
+      },
+      "p50_ms": 7.19,
+      "p95_ms": 14.1,
+      "p99_ms": 72.67,
+      "late_starts_over_50ms": 20,
+      "error_rate": 0.0,
+      "passes_criteria": true
+    }
+  ],
+  "baseline_control": {
+    "run": "baseline LR control (same conditions)",
+    "file": "serving_benchmark_baseline_control.json",
+    "measured_seconds": 60,
+    "achieved_rps": 99.9,
+    "outcomes": {
+      "model_scored": 5997
+    },
+    "p50_ms": 10.39,
+    "p95_ms": 45.73,
+    "p99_ms": 97.54,
+    "late_starts_over_50ms": 40,
+    "error_rate": 0.0,
+    "passes_criteria": true
+  },
+  "pass": false,
+  "summary": "0/4 candidate 60 s runs pass (achieved 80.5\u201387.5 rps, p95 2048\u20132356 ms); baseline control p95 46 ms",
+  "diagnosis": {
+    "established": [
+      "in-process sequential request cost: XGBoost 6.96 ms wall / 3.04 ms CPU vs LR 6.74 / 2.86 ms; prediction itself ~0.10 ms per request",
+      "OMP_NUM_THREADS=1 did not change the 20 s probe materially",
+      "API CPU oscillated 24-75% under the candidate vs a steady 22-26% under LR; feature reads missed the 50 ms timeout (scoreless reviews)"
+    ],
+    "not_established": "root cause of the degradation under sustained concurrent load"
+  }
+}

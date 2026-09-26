@@ -1,0 +1,96 @@
+name: ci
+
+# Status: configured, not yet executed remotely.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fraud
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: fraud_test
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U fraud -d fraud_test" --health-interval 2s
+          --health-timeout 3s --health-retries 60
+      redis:
+        image: redis:8-alpine
+        ports: ["6380:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 3s
+          --health-retries 60
+      kafka:
+        # Same single-node KRaft configuration as docker-compose.yml, reachable from the runner
+        # on 127.0.0.1:9094. Topic auto-creation stays off: tests create their own topics.
+        image: apache/kafka:4.0.0
+        env:
+          KAFKA_NODE_ID: "1"
+          KAFKA_PROCESS_ROLES: broker,controller
+          KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,EXTERNAL://127.0.0.1:9094
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+          KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+          KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+          KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+          KAFKA_HEAP_OPTS: "-Xms512m -Xmx512m"
+        ports: ["9094:9094"]
+        options: >-
+          --health-cmd "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092"
+          --health-interval 5s --health-timeout 15s --health-retries 40
+    env:
+      FRAUD_TEST_DATABASE_URL: postgresql://fraud:ci-only@127.0.0.1:5433/fraud_test
+      FRAUD_TEST_REDIS_URL: redis://127.0.0.1:6380/15
+      FRAUD_TEST_KAFKA_BOOTSTRAP: 127.0.0.1:9094
+      # Redis-outage tests pause this container (`docker pause`); it is the service container.
+      FRAUD_TEST_REDIS_CONTAINER: ${{ job.services.redis.id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - name: Lint and format
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Documentation links
+        run: uv run python scripts/check_doc_links.py
+      - name: Type check (mypy --strict)
+        run: uv run mypy
+      - name: Unit tests (hermetic)
+        timeout-minutes: 10
+        run: uv run pytest
+      - name: Wait for PostgreSQL, Redis and Kafka
+        timeout-minutes: 5
+        run: uv run python scripts/wait_for_services.py --timeout 240
+      - name: Integration tests (PostgreSQL, Redis, Kafka; MLflow uses a temporary SQLite store)
+        timeout-minutes: 15
+        run: uv run pytest -m integration
+
+  dashboard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

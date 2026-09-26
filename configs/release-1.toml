@@ -1,0 +1,35 @@
+# First release: frozen before the final test period is read. No new tuning: hyperparameters
+# come from the comparison's selected configuration (reports/model_comparison/report.json).
+release_id = "release-1"
+comparison_config = "configs/compare-v1.toml"
+comparison_report = "reports/model_comparison/report.json"
+test_start_day = 153
+test_end_day = 183            # exclusive; sim-v2 has days 0..182
+
+# Final refit: same configuration, fit window moved forward to the latest labelled data.
+final_fit_days = [30, 123]
+labels_known_by_day = 153     # fit rows need label_available_at <= day 153 (30-day gap)
+
+# Review-only policy for this release.
+review_capacity_target = 0.01           # share of transactions analysts can review
+policy_selection_days = [123, 146]      # scored by the final model; threshold = top-1% score
+policy_transfer_check_days = [146, 153] # forward check of the fixed threshold (pre-test)
+automatic_decline = false
+
+# Held-out evaluation plan.
+bootstrap_reps = 500                    # day-block bootstrap for uncertainty
+bootstrap_seed = 0
+simulated_worker_delay_ms = 1000        # condition B; condition A is immediate processing
+
+# Deployed baseline evaluated alongside (reference, unchanged).
+baseline_model = "lr-f1-6f0ebad8fcc7"
+baseline_policy = "artifacts/policies/lr-f1-6f0ebad8fcc7.json"
+
+[acceptance]  # declared before the test period is read
+candidate_ap_must_exceed_baseline_ap = true   # condition A, test period
+review_rate_min = 0.005                       # fixed-policy review rate on the test period
+review_rate_max = 0.020
+flagged_precision_min = 0.20
+serving_p95_ms_max = 100                      # end-to-end at 100 rps, local benchmark
+serving_p99_ms_max = 200
+serving_error_rate_max = 0.001

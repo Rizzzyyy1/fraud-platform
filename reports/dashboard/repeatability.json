@@ -1,0 +1,97 @@
+{
+  "started_at": "2026-09-25T18:35:04+00:00",
+  "namespace": "replay:dashboard-1790361263",
+  "steps": [
+    {
+      "step": "traffic run 1",
+      "job": 1,
+      "status": "succeeded",
+      "slice": [
+        0,
+        600
+      ],
+      "outcomes": {
+        "review": 4,
+        "approve": 596
+      },
+      "drained": {
+        "status": "ready",
+        "outbox_backlog": 0,
+        "consumer_lag_events": 0,
+        "worker_heartbeat_age_s": 0.660525
+      },
+      "passed": true
+    },
+    {
+      "step": "traffic run 2",
+      "job": 2,
+      "status": "succeeded",
+      "slice": [
+        600,
+        1200
+      ],
+      "outcomes": {
+        "review": 4,
+        "approve": 596
+      },
+      "drained": {
+        "status": "ready",
+        "outbox_backlog": 0,
+        "consumer_lag_events": 0,
+        "worker_heartbeat_age_s": 0.004912
+      },
+      "passed": true
+    },
+    {
+      "step": "consecutive runs use disjoint, contiguous slices",
+      "passed": true
+    },
+    {
+      "step": "cancel traffic mid-run",
+      "cancelled": {
+        "id": 3,
+        "status": "cancelled",
+        "sent": 98
+      },
+      "next_job_start_offset": 1298,
+      "passed": true
+    },
+    {
+      "step": "cancel failure drill while worker held",
+      "worker_held_before_cancel": true,
+      "job_status": "cancelled",
+      "outcomes": {
+        "review": 2,
+        "approve": 171
+      },
+      "worker_restarted": true,
+      "seconds_to_drained_after_cancel": 3.1,
+      "passed": true
+    },
+    {
+      "step": "worker killed during traffic",
+      "job": 6,
+      "outcomes": {
+        "review": 7,
+        "approve": 593
+      },
+      "worker_restarted": true,
+      "drained": {
+        "status": "ready",
+        "outbox_backlog": 0,
+        "consumer_lag_events": 0,
+        "worker_heartbeat_age_s": 0.697092
+      },
+      "passed": true
+    },
+    {
+      "step": "invariants",
+      "requests_sent": 2221,
+      "new_decisions": 2221,
+      "dead_letter_messages": 0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "finished_at": "2026-09-25T18:39:38+00:00"
+}

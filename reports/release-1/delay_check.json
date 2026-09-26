@@ -1,0 +1,11 @@
+{
+  "delay_1000ms": {
+    "test_rows": 301010,
+    "test_rows_with_different_features": 8
+  },
+  "delay_60000ms": {
+    "test_rows": 301010,
+    "test_rows_with_different_features": 1067
+  },
+  "note": "features only, no labels; test_rows counts decisions from day 153 onward, including 9 transactions decided on day 183 or later (late arrivals) that fall outside the evaluation window [153, 183)"
+}

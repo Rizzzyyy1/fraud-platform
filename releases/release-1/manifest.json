@@ -1,0 +1,279 @@
+{
+  "schema": "fraudplat.release-manifest/v1",
+  "release_id": "release-1",
+  "code_revision": "9e33491145c27e6b8124702a57bdb5b185946aa1",
+  "dataset": {
+    "dataset_id": "sim-v2",
+    "content_sha256": "97481ae593458ff0688aa118bec8fc7f2d3fc6d4be5c760b7489983b471f3d48"
+  },
+  "derived_features_sha256_pre_test": "4dee41ba639bf54ff8446a8f4a32c2bca582f641e82de9ed8d3f4a7cb3e6a8fe",
+  "feature_version": "f1",
+  "feature_names": [
+    "amount_minor",
+    "hour_of_day_utc",
+    "day_of_week_utc",
+    "cust_txn_count_1h",
+    "cust_txn_count_1d",
+    "cust_txn_count_7d",
+    "cust_txn_count_30d",
+    "cust_amount_mean_7d",
+    "cust_amount_mean_30d",
+    "amount_to_cust_mean_30d",
+    "secs_since_prev_cust_txn",
+    "cust_has_history_30d",
+    "cust_terminal_is_new_30d",
+    "term_txn_count_1d",
+    "term_txn_count_7d"
+  ],
+  "model": {
+    "model_version": "xgb-f1-1f168d371c42",
+    "family": "xgboost",
+    "hyperparameters": {
+      "max_depth": 3,
+      "n_estimators": 500,
+      "scale_pos_weight": 1.0
+    },
+    "fixed_parameters": {
+      "objective": "binary:logistic",
+      "eval_metric": "aucpr",
+      "tree_method": "hist",
+      "max_depth": 3,
+      "eta": 0.1,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "min_child_weight": 1.0,
+      "scale_pos_weight": 1.0,
+      "nthread": 6,
+      "seed": 0
+    },
+    "xgboost_version": "3.4.1",
+    "fit": {
+      "days": [
+        30,
+        123
+      ],
+      "rows": 932807,
+      "fraud": 8307,
+      "excluded_unlabelled": 0,
+      "label_rule": "label_available_at <= day 153"
+    },
+    "refit_procedure": "comparison-selected configuration refitted once on final_fit_days; no further tuning",
+    "files_sha256": {
+      "booster.json": "866932f49f3a2a8a8ad43ed8d5dfb235a069f4481036f661cf2647978489f746",
+      "manifest.json": "e37dcbfb87c51eabe28f12ab32531f8deb392d426aec60359bd6e42b19578a18"
+    }
+  },
+  "policy": {
+    "policy_version": "pol-c51799ac9da6",
+    "file_sha256": "92f969eff27433d1b5cc3600360c94c905b9cb40a13861436a5a90233fbd9f72",
+    "review_threshold": 0.022274499759078026,
+    "automatic_decline": false,
+    "review_capacity_target": 0.01,
+    "selection_days": [
+      123,
+      146
+    ],
+    "development_transfer": {
+      "selection_window": {
+        "rows": 229847,
+        "fraud_eventual": 1958,
+        "fixed_threshold_review_rate": 0.010002305881738721,
+        "reviewed": 2299,
+        "precision_eventual_labels": 0.29099608525445847,
+        "recall_eventual_labels": 0.34167517875383047,
+        "ranking_diagnostics": {
+          "average_precision": 0.33167463389511015,
+          "top_k_precision": 0.29099608525445847
+        }
+      },
+      "weeks": [
+        {
+          "days": [
+            123,
+            130
+          ],
+          "rows": 69943,
+          "fraud_eventual": 611,
+          "fixed_threshold_review_rate": 0.010465664898560257,
+          "reviewed": 732,
+          "precision_eventual_labels": 0.30327868852459017,
+          "recall_eventual_labels": 0.36333878887070375,
+          "ranking_diagnostics": {
+            "average_precision": 0.3550148423240256,
+            "top_k_precision": 0.3171428571428571
+          }
+        },
+        {
+          "days": [
+            130,
+            137
+          ],
+          "rows": 69903,
+          "fraud_eventual": 641,
+          "fixed_threshold_review_rate": 0.010671931104530564,
+          "reviewed": 746,
+          "precision_eventual_labels": 0.3002680965147453,
+          "recall_eventual_labels": 0.3494539781591264,
+          "ranking_diagnostics": {
+            "average_precision": 0.34622202357803744,
+            "top_k_precision": 0.31857142857142856
+          }
+        },
+        {
+          "days": [
+            137,
+            144
+          ],
+          "rows": 69976,
+          "fraud_eventual": 548,
+          "fixed_threshold_review_rate": 0.009331770892877558,
+          "reviewed": 653,
+          "precision_eventual_labels": 0.27105666156202146,
+          "recall_eventual_labels": 0.32299270072992703,
+          "ranking_diagnostics": {
+            "average_precision": 0.30182710102929605,
+            "top_k_precision": 0.2557142857142857
+          }
+        },
+        {
+          "days": [
+            144,
+            151
+          ],
+          "rows": 70070,
+          "fraud_eventual": 546,
+          "fixed_threshold_review_rate": 0.008505779934351363,
+          "reviewed": 596,
+          "precision_eventual_labels": 0.28691275167785235,
+          "recall_eventual_labels": 0.3131868131868132,
+          "ranking_diagnostics": {
+            "average_precision": 0.3023875984673466,
+            "top_k_precision": 0.24679029957203993
+          }
+        },
+        {
+          "days": [
+            151,
+            153
+          ],
+          "rows": 20126,
+          "fraud_eventual": 156,
+          "fixed_threshold_review_rate": 0.010036768359336182,
+          "reviewed": 202,
+          "precision_eventual_labels": 0.23267326732673269,
+          "recall_eventual_labels": 0.30128205128205127,
+          "ranking_diagnostics": {
+            "average_precision": 0.29434561362627737,
+            "top_k_precision": 0.23267326732673269
+          }
+        }
+      ],
+      "forward_check_window": {
+        "rows": 70171,
+        "fraud_eventual": 544,
+        "fixed_threshold_review_rate": 0.008978067862792321,
+        "reviewed": 630,
+        "precision_eventual_labels": 0.273015873015873,
+        "recall_eventual_labels": 0.3161764705882353,
+        "ranking_diagnostics": {
+          "average_precision": 0.3048593243973082,
+          "top_k_precision": 0.245014245014245
+        }
+      }
+    }
+  },
+  "comparison": {
+    "report_sha256": "e8ceb831accdaf79b9226ec6d9e1a897e161559b348aeaa555b112504a90ffcd",
+    "mlflow_parent_run_id": "e79eaee27268443c9cf63743ca8a8a41",
+    "selection": {
+      "rule": {
+        "primary_metric": "mean_eval_average_precision",
+        "xgboost_min_ap_gain": 0.02,
+        "xgboost_min_fold_wins": 2,
+        "max_single_row_p99_us": 1000,
+        "max_artifact_bytes": 10000000
+      },
+      "mean_ap_gain_xgb_minus_lr": 0.0357359983825527,
+      "xgb_fold_wins": 3,
+      "xgb_serving_constraints_met": true,
+      "selected_family": "xgb",
+      "selected_model_version": "xgb-f1-fcf93e5d253d",
+      "policy_version": "pol-1e442fb0f055"
+    },
+    "models": {
+      "deployed_baseline_lr": {
+        "model_version": "lr-f1-6f0ebad8fcc7",
+        "fit_days": [
+          30,
+          100
+        ],
+        "C": 0.001,
+        "class_weight": "none",
+        "policy_version": "pol-82d9e16668ae",
+        "policy": "review 0.0378 / decline 0.0745, chosen on days 130-153"
+      },
+      "comparison_best_lr": {
+        "model_version": "lr-f1-add35a7584bf",
+        "fit_days": [
+          30,
+          90
+        ],
+        "C": 0.01,
+        "class_weight": "none"
+      },
+      "comparison_selected_xgb": {
+        "model_version": "xgb-f1-fcf93e5d253d",
+        "fit_days": [
+          30,
+          90
+        ],
+        "max_depth": 3,
+        "n_estimators": 500,
+        "scale_pos_weight": 1.0
+      },
+      "release_xgb": {
+        "model_version": "xgb-f1-1f168d371c42",
+        "fit_days": [
+          30,
+          123
+        ],
+        "max_depth": 3,
+        "n_estimators": 500,
+        "scale_pos_weight": 1.0
+      }
+    }
+  },
+  "baseline_for_rollback": {
+    "model_version": "lr-f1-6f0ebad8fcc7",
+    "policy_version": "pol-82d9e16668ae",
+    "files_sha256": {
+      "model.json": "bc23cc37e90b914263f49e8afbf54ace3ef9ae354d67ef6fa33fb39cce42cb0e"
+    }
+  },
+  "evaluation_plan": {
+    "test_days": [
+      153,
+      183
+    ],
+    "labels": "eventual simulated labels (is_fraud)",
+    "feature_conditions": {
+      "A": "arrival-time availability, immediate processing (delay 0)",
+      "B": "arrival-time availability, simulated worker delay 1000 ms"
+    },
+    "history": "all earlier transactions update features under the documented availability rules",
+    "forbidden": "training, tuning, recalibration or threshold changes using test outcomes",
+    "uncertainty": "day-block bootstrap, 500 replicates, seed 0",
+    "ranking_diagnostics": "retrospective top-1% (ties: earlier decision time, then order)"
+  },
+  "acceptance_criteria": {
+    "candidate_ap_must_exceed_baseline_ap": true,
+    "review_rate_min": 0.005,
+    "review_rate_max": 0.02,
+    "flagged_precision_min": 0.2,
+    "serving_p95_ms_max": 100,
+    "serving_p99_ms_max": 200,
+    "serving_error_rate_max": 0.001
+  },
+  "created_at": "2026-09-25T02:27:09+00:00",
+  "integrity_sha256": "c89d22ee4bd0e8eebdfde5f97e7792db720151074de4b27dcc2a16982266dbef"
+}

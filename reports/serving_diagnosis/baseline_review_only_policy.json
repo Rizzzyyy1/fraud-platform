@@ -1,0 +1,43 @@
+{
+  "policy_version": "pol-6164cb21826d",
+  "review_threshold": 0.03814305475952357,
+  "registry_version": "5",
+  "development_review_rates": [
+    {
+      "days": [
+        123,
+        130
+      ],
+      "review_rate": 0.010222609839440688
+    },
+    {
+      "days": [
+        130,
+        137
+      ],
+      "review_rate": 0.010342903738036995
+    },
+    {
+      "days": [
+        137,
+        144
+      ],
+      "review_rate": 0.00967474562707214
+    },
+    {
+      "days": [
+        144,
+        151
+      ],
+      "review_rate": 0.009433423719138004
+    },
+    {
+      "days": [
+        151,
+        153
+      ],
+      "review_rate": 0.008844281029514062
+    }
+  ],
+  "forward_check_review_rate": 0.009334340397030112
+}

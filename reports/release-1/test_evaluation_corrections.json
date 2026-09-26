@@ -1,0 +1,64 @@
+{
+  "source": "test_evaluation.json (unchanged); values derived arithmetically, no data reread",
+  "terminology": {
+    "flagged": "reviewed or automatically declined",
+    "reviewed": "sent to analyst review (not declined)",
+    "note": "the frozen field 'legitimate_sent_to_review' counts legitimate transactions that were flagged (reviewed or declined); for the review-only candidate the two coincide"
+  },
+  "conditions": {
+    "A_immediate_processing": {
+      "candidate": {
+        "flagged": 3090,
+        "flagged_rate": 0.010265746625426493,
+        "legitimate_flagged": 2110,
+        "reviewed": 3090,
+        "review_rate": 0.010265746625426493,
+        "declined": 0,
+        "legitimate_reviewed": 2110,
+        "legitimate_declined": 0
+      },
+      "baseline": {
+        "flagged": 3113,
+        "flagged_rate": 0.010342158331699894,
+        "legitimate_flagged": 2205,
+        "reviewed": 2410,
+        "review_rate": 0.008006617918212897,
+        "declined": 703,
+        "decline_rate": 0.002335540413486998,
+        "declined_fraud": 661,
+        "legitimate_declined": 42,
+        "legitimate_reviewed": 2163
+      }
+    },
+    "B_simulated_worker_delay_ms": {
+      "candidate": {
+        "flagged": 3090,
+        "flagged_rate": 0.010265746625426493,
+        "legitimate_flagged": 2110,
+        "reviewed": 3090,
+        "review_rate": 0.010265746625426493,
+        "declined": 0,
+        "legitimate_reviewed": 2110,
+        "legitimate_declined": 0
+      },
+      "baseline": {
+        "flagged": 3113,
+        "flagged_rate": 0.010342158331699894,
+        "legitimate_flagged": 2205,
+        "reviewed": 2410,
+        "review_rate": 0.008006617918212897,
+        "declined": 703,
+        "decline_rate": 0.002335540413486998,
+        "declined_fraud": 661,
+        "legitimate_declined": 42,
+        "legitimate_reviewed": 2163
+      }
+    }
+  },
+  "denominator": {
+    "evaluated_rows": 301001,
+    "delay_check_rows": 301010,
+    "difference": 9,
+    "explanation": "The evaluation window [153, 183) in decision time was fixed in the release manifest before the test was read. Nine transactions happened on day 182 but arrived (and so were decided) on day 183, after the simulated period; the window excludes them. The follow-up delay count used day >= 153 with no upper bound and so included them. The window itself was predefined; the existence of these nine late arrivals was not specifically anticipated."
+  }
+}

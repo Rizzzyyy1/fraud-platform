@@ -1,0 +1,44 @@
+{
+  "fixture_days": [
+    123,
+    153
+  ],
+  "rows": 5000,
+  "models": {
+    "lr-f1-6f0ebad8fcc7": {
+      "max_abs_score_difference": 0.0,
+      "policies": {
+        "pol-82d9e16668ae": {
+          "action_changes": 0,
+          "action_counts": {
+            "approve": 4944,
+            "review": 45,
+            "decline": 11
+          }
+        },
+        "pol-6164cb21826d": {
+          "action_changes": 0,
+          "action_counts": {
+            "approve": 4945,
+            "review": 55,
+            "decline": 0
+          }
+        }
+      }
+    },
+    "xgb-f1-1f168d371c42": {
+      "max_abs_score_difference": 0.0,
+      "policies": {
+        "pol-c51799ac9da6": {
+          "action_changes": 0,
+          "action_counts": {
+            "approve": 4956,
+            "review": 44,
+            "decline": 0
+          }
+        }
+      }
+    }
+  },
+  "parity": true
+}

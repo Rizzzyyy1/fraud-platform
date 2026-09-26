@@ -1,0 +1,33 @@
+# Small deterministic dataset for Checkpoint B/C development and tests of the full pipeline.
+# Amounts are synthetic and labelled USD; nothing here describes real payments.
+dataset_id = "sim-small-v1"
+seed = 20260924
+n_customers = 500
+n_terminals = 1000
+n_days = 60
+start_date = 2025-01-01
+radius = 10.0              # ~31 terminals per customer at this density (handbook: r=5 for 10k terminals)
+time_of_day_mean_s = 43200 # noon UTC (handbook prose: gaussian centred on noon)
+time_of_day_std_s = 18000  # 5 h: our choice; the prose does not state it
+currency = "USD"
+
+[arrival]                  # synthetic, not in the handbook
+typical_median_ms = 200
+typical_sigma = 1.0
+delayed_fraction = 0.02
+delayed_min_s = 60
+delayed_max_s = 21600      # up to 6 h late
+
+[labels]                   # synthetic, not in the handbook
+fraud_delay_min_days = 1
+fraud_delay_max_days = 30
+legit_maturity_days = 30
+
+[scenarios]                # handbook prose
+s1_amount_threshold_minor = 22000   # amount > 220
+s2_terminals_per_day = 2
+s2_duration_days = 28
+s3_customers_per_day = 3
+s3_duration_days = 14
+s3_fraction = 0.3333333333333333
+s3_multiplier = 5
