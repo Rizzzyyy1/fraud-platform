@@ -253,7 +253,7 @@ async def test_health_reports_unavailable_telemetry_instead_of_values(console: F
     assert health["deployment"]["namespace"] == NS
     assert health["console"]["database"] is True
     results = (await http.get("/api/results")).json()
-    assert {r["split"] for r in results["results"]} <= {"development", "held-out"}
+    assert {r["split"] for r in results["results"]} <= {"development", "held-out", "external"}
     assert (await http.get("/api/reports/held_out")).status_code == 200
     assert (await http.get("/api/reports/..%2F.env")).status_code == 404
     await http.aclose()

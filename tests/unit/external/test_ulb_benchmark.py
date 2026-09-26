@@ -35,3 +35,11 @@ def test_ece_is_zero_when_scores_match_rates_and_positive_otherwise() -> None:
     y = np.array([0, 1] * 50)
     assert ece(y, np.full(100, 0.5)) == 0.0
     assert ece(y, np.full(100, 0.9)) > 0.3
+
+
+def test_committed_report_is_rendered_from_its_json() -> None:
+    import json
+
+    from fraudplat.external.report import SRC, render
+
+    assert SRC.with_suffix(".md").read_text() == render(json.loads(SRC.read_text()))

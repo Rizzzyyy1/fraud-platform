@@ -17,6 +17,7 @@ REPORTS: dict[str, tuple[str, str]] = {
     "diagnosis": ("Serving diagnosis (12 runs)", "reports/serving_diagnosis/summary.md"),
     "benchmark": ("End-to-end benchmark", "reports/benchmarks/e2e.md"),
     "model_card": ("Model card", "docs/MODEL_CARD.md"),
+    "ulb": ("Real-data offline benchmark (ULB)", "reports/external/ulb/benchmark.md"),
 }
 
 
@@ -132,6 +133,47 @@ def historical_results() -> list[dict[str, Any]]:
                     for w in policy["development_review_rates"]
                 ],
                 "note": "No held-out result exists for this policy; the test period is not reused.",
+            }
+        )
+    ulb = _load("reports/external/ulb/benchmark.json")
+    if ulb is not None:
+        test = ulb["windows"]["test"]
+        names = {"lr": "Logistic regression", "xgb": "XGBoost"}
+        out.append(
+            {
+                "key": "ulb_benchmark",
+                "title": "Real-data offline benchmark (ULB)",
+                "split": "external",
+                "split_detail": (
+                    f"real, anonymised card transactions ({ulb['dataset']}); held out: elapsed "
+                    f"hours 32\u201348, {test['rows']:,} transactions, {test['frauds']} frauds; "
+                    "evaluated once"
+                ),
+                "source": "reports/external/ulb/benchmark.json",
+                "rows": [
+                    {
+                        "label": names[family],
+                        "identity": "offline fit, not saved: "
+                        + ", ".join(f"{k}={val}" for k, val in v["selected"].items()),
+                        "metrics": {
+                            "validation_ap": v["validation_ap"],
+                            "average_precision": v["test"]["average_precision"],
+                            "average_precision_95ci": v["test"]["ci95"]["average_precision"],
+                            "roc_auc": v["test"]["roc_auc"],
+                            "precision_at_threshold": v["test"]["at_fixed_threshold"]["precision"],
+                            "recall_at_threshold": v["test"]["at_fixed_threshold"]["recall"],
+                            "review_rate": v["test"]["at_fixed_threshold"]["review_rate"],
+                        },
+                    }
+                    for family, v in ulb["families"].items()
+                ],
+                "note": (
+                    "These models do not power the live scoring service, and no model is selected "
+                    "from these held-out results. Features are PCA components computed upstream by "
+                    "the data owner (fitting scope unverifiable); no customer or merchant IDs; "
+                    "label-arrival times unavailable. AP here is not comparable with the synthetic "
+                    "results above."
+                ),
             }
         )
     return out

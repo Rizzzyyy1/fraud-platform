@@ -87,8 +87,10 @@ instead of arrival time. Whether those differences change scores or actions was 
 ## External benchmark data: ULB credit-card fraud (real, offline only)
 
 284,807 real card transactions over 48 hours (September 2013), 492 frauds (0.17%). Features
-V1–V28 are PCA components released by the data owner, plus `Time` and `Amount`; no customer or
-merchant identifiers, no label delays, no currency. It is used only for the offline benchmark in
+V1–V28 are PCA components computed upstream by the data owner (the fitting scope of that PCA
+cannot be verified from the released features), plus `Time` (elapsed seconds, not time of day)
+and `Amount`; no customer or merchant identifiers; actual label-arrival times are unavailable; no
+currency. It is used only for the offline benchmark in
 `reports/external/ulb/benchmark.md` (split by time: train 0–24 h, validation 24–32 h, held-out
 32–48 h) and never enters the platform, its features or its models. Provenance and licence:
 `THIRD_PARTY_NOTICES.md`.

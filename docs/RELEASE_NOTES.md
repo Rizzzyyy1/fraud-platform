@@ -5,11 +5,19 @@ models, policies and results are unchanged.
 
 * **ULB credit-card data** (real, anonymised, 2 days, 492 frauds), downloaded from OpenML with a
   checksum check and never committed.
-* **Protocol committed before evaluation**; held-out window (last 16 hours) evaluated once:
-  XGBoost AP 0.746 (95% CI 0.662–0.813), logistic regression 0.647 (0.507–0.752).
-* **Findings reported as measured:** a random split gave higher AP for both models (indicative of
-  optimism from ignoring time); a threshold fixed on validation produced a lower review rate than
-  its 0.5% budget on the test window.
+* **Protocol committed before evaluation**; held-out window (elapsed hours 32–48) evaluated once:
+  XGBoost AP 0.746 (95% CI 0.662–0.813), logistic regression 0.647 (0.507–0.752). Logistic
+  regression had the higher validation AP. No model is selected from held-out results, no
+  significance is claimed from the per-model intervals, and these models do not power the live
+  scoring service.
+* **Findings reported as measured:** a threshold fixed on validation produced a lower review rate
+  than its 0.5% budget on the test window. A stratified random split scored higher AP for both
+  models; this is descriptive only (different training sizes and test populations).
+* **Data limits:** PCA was applied upstream by the data owner and its fitting scope cannot be
+  verified; label-arrival times are unavailable; licensing metadata is recorded per distributor in
+  `THIRD_PARTY_NOTICES.md`; raw data is not redistributed.
+* **Experiment tracking and dashboard:** the completed run is imported into MLflow as a historical
+  run, and the dashboard's historical results show a labelled "Real-data offline benchmark" entry.
 * Report: `reports/external/ulb/benchmark.md`; provenance: `THIRD_PARTY_NOTICES.md`.
 
 ---

@@ -58,9 +58,19 @@ Screenshots and the demo video show only this project's own application and synt
 
 ## External dataset: ULB credit-card fraud (offline benchmark only)
 
+**Origin and citation.** Machine Learning Group, Université Libre de Bruxelles, with Worldline;
 Dal Pozzolo, Caelen, Johnson and Bontempi, *Calibrating Probability with Undersampling for
-Unbalanced Classification*, IEEE SSCI 2015; data from the Machine Learning Group, Université Libre
-de Bruxelles, and Worldline. Obtained from OpenML dataset 1597 (version 1, licence listed as
-"Public"; the Kaggle copy lists DbCL v1.0). `python -m fraudplat.external.ulb fetch` downloads it
-and checks OpenML's MD5; the data is **not redistributed** in this repository. Only derived
-aggregate metrics are committed (`reports/external/ulb/`).
+Unbalanced Classification*, IEEE SSCI 2015.
+
+**Licensing metadata as recorded by each distributor (recorded, not interpreted):**
+
+| Source | Recorded licence | Accessed |
+|---|---|---|
+| OpenML dataset 1597, version 1 (the copy downloaded here) | licence field: "Public" | 2026-09-26 |
+| Kaggle dataset "Credit Card Fraud Detection" (mlg-ulb) | Database Contents License (DbCL) v1.0 | from its dataset page; not re-verified here |
+| Original data owners (ULB MLG / Worldline) | terms not independently verified | — |
+
+A distributor's label is not treated as permission overriding the original owners' terms. The raw
+data is **not redistributed**: `python -m fraudplat.external.ulb fetch` downloads it into the
+git-ignored `data/` directory and checks OpenML's MD5 (`178bcf9bb1f31a3dfe12d0e577884add`). Only
+derived aggregate metrics are committed (`reports/external/ulb/`).
