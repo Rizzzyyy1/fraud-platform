@@ -9,10 +9,11 @@ in a React console. A portfolio project; everything runs on one laptop at no cos
 
 **▶ [Watch the demo video (4 min 21 s, real time, captioned)](https://github.com/Rizzzyyy1/fraud-platform/releases/download/v1.0.0/fraud-platform-demo.webm)** · [Release v1.0.0](https://github.com/Rizzzyyy1/fraud-platform/releases/tag/v1.0.0)
 
-<sub>Investigation view of a real decision from the local deployment. More:
+<sub>Investigation view of a decision from the local demo deployment (historical capture,
+2026-09-25 walkthrough; see [screenshot provenance](docs/screenshots/README.md)). More:
 [live activity](docs/screenshots/02-live-activity.png) ·
 [failure drill](docs/screenshots/11-drill-scoring-suppressed.png) ·
-[model and system health](docs/screenshots/07-health.png) ·
+[model and system health, as of 2026-09-25](docs/screenshots/07-health.png) ·
 [real-data offline benchmark](docs/screenshots/16-real-data-benchmark.png) ·
 [demo script](docs/DEMO_SCRIPT.md)</sub>
 
@@ -264,10 +265,14 @@ Simulated data; one Apple M1 laptop; see each source for conditions.
 
 ## Screenshots
 
+Historical captures from the 2026-09-25 scripted walkthrough. They show the state at that time,
+not the current health of any deployment. Provenance, including which states were injected:
+[docs/screenshots/README.md](docs/screenshots/README.md).
+
 | Live activity | Investigation |
 |---|---|
 | ![Live activity](docs/screenshots/02-live-activity.png) | ![Investigation](docs/screenshots/04-investigation-detail.png) |
-| **Model & system health** | **Failure drill: scoring suppressed** |
+| **Model & system health (as of 2026-09-25)** | **Failure drill: scoring suppressed** |
 | ![Health](docs/screenshots/07-health.png) | ![Drill](docs/screenshots/11-drill-scoring-suppressed.png) |
 
 All screenshots: [docs/screenshots/](docs/screenshots/). Demo: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
@@ -284,6 +289,8 @@ attribution. What was consulted, what was adapted and what was written independe
 in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Dependencies keep their own licenses.
 
 The real-data benchmark uses the ULB credit-card dataset (Worldline and ULB MLG; cite Dal
-Pozzolo et al., CIDM 2015). It is downloaded by the user and never redistributed here. Its
-source terms, and the licensing questions still open, are recorded in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Pozzolo et al., CIDM 2015). It is downloaded by the user from the owner-listed source and never
+redistributed here. Contains information from [Credit Card Fraud
+Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud), which is made available here
+under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/). Source
+comparison and licence details: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

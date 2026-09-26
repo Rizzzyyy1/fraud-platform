@@ -1,4 +1,4 @@
-.PHONY: env install up down migrate serve test test-integration lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down smoke docs-check ulb-fetch ulb-reproduce ulb-mlflow ulb-report
+.PHONY: env install up down migrate serve test test-integration lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down smoke docs-check ulb-fetch ulb-fetch-openml ulb-reproduce ulb-mlflow ulb-report
 
 env:            ## create .env from the example (local development only)
 	@test -f .env || cp .env.example .env
@@ -35,8 +35,11 @@ smoke:          ## browser smoke test: real console + built dashboard on a seede
 	$(ITEST) up -d --wait postgres
 	uv run python scripts/browser_smoke.py --admin-url postgresql://fraud:itest-only@127.0.0.1:5543/postgres
 
-ulb-fetch:      ## download and verify the real ULB dataset (offline benchmark only; not committed)
-	uv run python -m fraudplat.external.ulb fetch
+ulb-fetch:      ## download and verify the ULB data from the owner-listed Kaggle source (not committed)
+	uv run python -m fraudplat.external.ulb fetch --source kaggle
+
+ulb-fetch-openml: ## the OpenML 1597 v1 copy the original benchmark used (identical data rows)
+	uv run python -m fraudplat.external.ulb fetch --source openml
 
 ulb-report:     ## re-render the ULB benchmark report from its committed JSON (no recomputation)
 	uv run python -m fraudplat.external.report

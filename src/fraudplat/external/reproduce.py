@@ -47,7 +47,7 @@ from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 
 from fraudplat.external import benchmark as bm
-from fraudplat.external.ulb import DIR, FEATURES, MD5, load
+from fraudplat.external.ulb import FEATURES, load, source
 
 REFERENCE = bm.OUT
 ARTIFACTS = Path("artifacts/external/ulb/reproduction")
@@ -77,13 +77,11 @@ def git(*args: str) -> str:
 
 
 def environment() -> dict[str, Any]:
-    arff = DIR / "creditcard.arff"
-    md5 = hashlib.md5(arff.read_bytes(), usedforsecurity=False).hexdigest()
-    if md5 != MD5:
-        raise SystemExit(f"dataset checksum {md5} != {MD5}: not the benchmark's data")
+    record = source()  # written by `ulb fetch` after verifying the file's checksum
     lock = Path("uv.lock")
     return {
-        "dataset_md5": md5,
+        "dataset_source": record,
+        "dataset_md5": record.get("md5"),  # OpenML route; the Kaggle route records its SHA-256
         "code_revision": git("rev-parse", "HEAD"),
         "code_dirty": bool(git("status", "--porcelain", "--", "src", "uv.lock")),
         "protocol_sha256": sha256(Path(bm.__file__)),
@@ -306,6 +304,11 @@ def reproduce(out: Path) -> dict[str, Any]:
 
 
 SUMMARY = REFERENCE.with_name("reproduction.json")
+ODBL_NOTICE = (
+    "Contains information from [Credit Card Fraud Detection]"
+    "(https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud), which is made available here "
+    "under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/)."
+)
 
 
 def summarize(run_dir: Path, imported_at: str | None) -> dict[str, Any]:
@@ -352,6 +355,11 @@ def render(s: dict[str, Any]) -> str:
         f"difference {cmp['max_abs_diff']:.3g}; all within {cmp['tolerance']:g}: "
         f"{'yes' if cmp['all_within_tolerance'] else 'no'}.",
         "",
+        "Scope of this result: the values were reproduced identically in the rerun environment "
+        "recorded below. The original run's environment was not recorded, so this does not show "
+        "that the original ran in the same environment, nor that other platforms or library "
+        "versions give the same digits.",
+        "",
         "| Family | Selected | Test AP reference | Test AP rerun | Threshold reference | "
         "Threshold rerun |",
         "|---|---|---|---|---|---|",
@@ -385,7 +393,8 @@ def render(s: dict[str, Any]) -> str:
         f"* Python {env['python']}, {env['platform']} {env.get('machine', '')}; "
         + ", ".join(f"{p} {v}" for p, v in env["packages"].items()),
         "* The original run did not record its environment. `uv.lock` and the protocol code are "
-        "unchanged since the results commit; the exact match above is the evidence of parity.",
+        "unchanged in the repository since the results commit; which versions were installed "
+        "when the original ran is not known.",
         "",
         "## Artifacts (local only, not published)",
         "",
@@ -400,6 +409,7 @@ def render(s: dict[str, Any]) -> str:
         f"| `{name}` | {f['bytes']:,} | `{f['sha256']}` |"
         for name, f in sorted(s["local_artifacts"].items())
     ]
+    lines += ["", ODBL_NOTICE]
     return "\n".join(lines) + "\n"
 
 

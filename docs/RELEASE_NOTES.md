@@ -15,13 +15,16 @@ models, policies and results are unchanged.
   models; this is descriptive only (different training sizes and test populations).
 * **Data limits:** PCA was applied upstream by the data owner and its fitting scope cannot be
   verified; label-arrival times are unavailable; raw data is not redistributed.
-* **Source terms checked at the source (2026-09-26), not declared complete:** OpenML's copy lists
-  "Public" (not a licence). Kaggle's listing states ODbL v1.0 (database) and DbCL v1.0
-  (contents). Neither source says whether those terms cover the OpenML copy. The owners' own
-  pages were unreachable. Open items are listed in `THIRD_PARTY_NOTICES.md`.
+* **Source provenance:** the owner-listed Kaggle copy (`mlg-ulb/creditcardfraud` v3, ODbL v1.0
+  for the database, DbCL v1.0 for its contents) was compared cell by cell with the OpenML 1597 v1
+  copy the benchmark used. The data rows are identical (`reports/external/ulb/source_comparison.md`).
+  Kaggle is now the default acquisition route; the benchmark's recorded OpenML provenance is kept.
+  The ODbL §4.3 notice is carried with the published results. The derived tables and models stay
+  local (`THIRD_PARTY_NOTICES.md`).
 * **Reproducibility rerun:** the frozen protocol was rerun with the original's selected
-  configurations (no search). All 41 recorded values matched exactly, and two reruns gave
-  byte-identical models and predictions. Those artifacts are saved locally and not published
+  configurations (no search). All 41 recorded values matched exactly in the recorded rerun
+  environment; the original run's environment was not recorded. Two reruns gave byte-identical
+  models and predictions. Those artifacts are saved locally and not published
   (`reports/external/ulb/reproduction.md`). The rerun is logged as a separate MLflow run, linked
   to the imported historical run.
 * **Experiment tracking and dashboard:** the completed run is imported into MLflow as a historical

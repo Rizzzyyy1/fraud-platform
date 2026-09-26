@@ -176,6 +176,15 @@ def claims() -> list[tuple[str, list[str], str]]:
             f"logistic regression {r(ulb['lr']['test']['average_precision'], 3)}",
         )
     )
+    sources = load("reports/external/ulb/source_comparison.json")
+    if sources["identical_data"] and sources["cells"]["text_differences"] == 0:
+        out.append(
+            (
+                "ULB source comparison (source_comparison.json)",
+                ["THIRD_PARTY_NOTICES.md", "docs/PROGRESS.md"],
+                f"{sources['cells']['total']:,} cells",
+            )
+        )
     rerun = load("reports/external/ulb/reproduction.json")["comparison"]
     if rerun["all_within_tolerance"] and rerun["max_abs_diff"] == 0:
         out.append(

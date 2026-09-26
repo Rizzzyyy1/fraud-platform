@@ -173,7 +173,11 @@ def historical_results() -> list[dict[str, Any]]:
                     "the data owner (fitting scope unverifiable); no customer or merchant IDs; "
                     "label-arrival times unavailable. AP here is not comparable with the synthetic "
                     "results above. A later rerun of the frozen protocol reproduced these values "
-                    "exactly; its models and predictions are kept locally, not published."
+                    "identically in its recorded environment (the original environment was not "
+                    "recorded); its models and predictions are kept locally, not published. "
+                    "Contains information from Credit Card Fraud Detection (Kaggle "
+                    "mlg-ulb/creditcardfraud), made available under the Open Database License "
+                    "(ODbL)."
                 ),
             }
         )
