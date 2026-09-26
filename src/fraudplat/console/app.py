@@ -127,7 +127,7 @@ def _session_view(session: Session) -> dict[str, Any]:
 def create_console(
     settings: Settings | None = None,
     deployment: Deployment | None = None,
-    state_dir: Path = STATE_DIR,
+    state_dir: Path | None = None,
     accounts_file: Path | None = None,
     api_url: str | None = None,
     telemetry: Telemetry | None = None,
@@ -135,6 +135,9 @@ def create_console(
     secure_cookie: bool = False,
 ) -> FastAPI:
     settings = settings or Settings()
+    # FRAUD_CONSOLE_STATE_DIR lets a disposable deployment (e.g. the browser smoke test) keep its
+    # accounts and deployment record outside run/dashboard.
+    state_dir = state_dir or Path(os.environ.get("FRAUD_CONSOLE_STATE_DIR") or STATE_DIR)
     deployment = deployment or load_deployment(state_dir)
     if deployment is None:
         raise RuntimeError("no dashboard deployment; run `make dashboard` first")
@@ -144,7 +147,8 @@ def create_console(
     telemetry = telemetry or Telemetry(
         api_url or f"http://127.0.0.1:{api_port}",
         settings.mlflow_tracking_uri,
-        os.environ.get("FRAUD_CONSOLE_MODEL_URI", "models:/fraud-risk-f1@production"),
+        # An empty value means "no registry": the health view then reports the target unavailable.
+        os.environ.get("FRAUD_CONSOLE_MODEL_URI", "models:/fraud-risk-f1@production") or None,
     )
     jobs = jobs or JobManager(settings.database_url.get_secret_value(), deployment, state_dir)
     started_at = time.time()

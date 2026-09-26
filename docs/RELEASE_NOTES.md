@@ -1,3 +1,24 @@
+# Release notes — v1.0.1 (maintenance)
+
+No models, policies, thresholds or held-out results changed; no evaluation or benchmark was rerun.
+
+* **Documentation matches its evidence.** Four current summaries disagreed with the reports they
+  cite and were corrected: failure-drill scoreless reviews (156 of 750, not 157), dashboard
+  response means (6.7–62.1 ms, not 9–46 ms), demo repeatability (2,221 requests and decisions,
+  not 2,220), and the calibration statement, which now separates the comparison-stage models
+  (raw ECE: logistic regression 0.0028–0.0034, XGBoost 0.0015–0.0027; Platt scaling did not
+  consistently improve it) from the deployed artifact, which has no calibration evaluation of its
+  own. `scripts/check_evidence.py` (in CI) recomputes these figures from the committed reports.
+* **Browser smoke test in CI.** The real console and dashboard build in Chrome, against a seeded
+  disposable database: sign-in, anonymous rejection, cookie protections, all views, pagination,
+  decision identities, an analyst review that leaves the decision unchanged, and logout. It does
+  not exercise the scoring API or the streaming pipeline.
+* **Console:** the state directory can be set with `FRAUD_CONSOLE_STATE_DIR`, and an empty
+  `FRAUD_CONSOLE_MODEL_URI` means "no registry" (used by the smoke test).
+* **CI workflow header** no longer says the workflow has never run.
+
+---
+
 # Release notes — v1.0.0 (first public release)
 
 **Repository description (GitHub "About"):** Locally deployed, production-oriented fraud
@@ -46,7 +67,7 @@ demonstration video (attached to this release; real time, captions added).
 ## Known limitations
 
 Synthetic data only; single machine; scenario 2 (compromised terminals, ~60% of simulated fraud)
-essentially undetected; calibration not evaluated; sustained latency inconsistent (cause not
+essentially undetected; calibration was examined only for the comparison-stage models on development folds (raw ECE: logistic regression 0.0028–0.0034, XGBoost 0.0015–0.0027; Platt scaling did not consistently improve it); the deployed artifact `lr-f1-6f0ebad8fcc7` has no calibration evaluation of its own, so outputs are presented as risk scores, not probabilities; sustained latency inconsistent (cause not
 established); occasional 50 ms feature-read timeouts produce scoreless reviews; console over
 local HTTP with in-memory sessions; confirmed labels not connected to the console.
 

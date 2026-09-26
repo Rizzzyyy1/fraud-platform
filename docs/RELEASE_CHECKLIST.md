@@ -29,7 +29,7 @@ has **not** run and nothing has been pushed or published.
 
 * Synthetic data only; single machine; one API process; local HTTP with in-memory console sessions.
 * Scenario 2 (compromised terminals, ~60% of simulated fraud) essentially undetected (recall ≈ 0.01);
-  calibration not evaluated; transaction-level metrics only.
+  calibration was examined only for the comparison-stage models on development folds (raw ECE: logistic regression 0.0028–0.0034, XGBoost 0.0015–0.0027; Platt scaling did not consistently improve it). The deployed artifact `lr-f1-6f0ebad8fcc7` has no calibration evaluation of its own, so outputs are presented as risk scores, not probabilities. Transaction-level metrics only.
 * Sustained 100 rps latency inconsistent for both models (4/6 runs each); cause not established.
 * The active review-only policy has no held-out result.
 * Occasional 50 ms feature-read timeouts produce scoreless reviews under normal demo traffic.
@@ -49,6 +49,6 @@ video attached, and the README links to it.
 
 ## Original requirements still deferred
 
-Candidate promotion and a serving-latency fix; calibration; customer-level metrics; terminal
+Candidate promotion and a serving-latency fix; calibration of the deployed artifact; customer-level metrics; terminal
 fraud-history features (scenario 2); shadow deployment; Prometheus/Grafana servers (metrics
 endpoints exist); cloud deployment (outside the $0 constraint).

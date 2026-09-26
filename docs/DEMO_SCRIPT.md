@@ -66,5 +66,5 @@ running.
 * Limitation: "Synthetic data only, and both models essentially miss the compromised-terminal
   scenario. Sustained 100 rps latency was inconsistent on this machine, so I don't claim it."
 
-A separate recorded run of the same drill: 750 decisions at 5/s, 157 scoreless reviews, 0 HTTP
+A separate recorded run of the same drill: 750 decisions at 5/s, 156 scoreless reviews, 0 HTTP
 errors (`reports/dashboard/walkthrough.json`).

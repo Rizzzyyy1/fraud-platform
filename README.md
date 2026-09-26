@@ -41,8 +41,8 @@ in a React console. A portfolio project; everything runs on one laptop at no cos
 | Result | Context |
 |---|---|
 | Held-out AP **0.357** (XGBoost candidate) vs **0.319** (LR baseline), non-overlapping 95% CIs | 301,001 held-out transactions, evaluated once. The candidate is **not promoted**. The **active** release is the LR baseline with a **review-only policy that has no held-out result** (development review rate 0.88–1.03%). [report](reports/release-1/test_evaluation.md) |
-| Failure drill: worker stopped 90 s → **157 of 750** decisions stored as scoreless reviews, **0** HTTP errors, automatic recovery | Real thresholds, 5 transactions/s. [walkthrough](reports/dashboard/walkthrough.json) |
-| **2,220** demo requests → **2,220** new decisions, **0** dead-lettered events, including a SIGKILLed worker and cancelled jobs | Repeatability check on a clean setup. [report](reports/dashboard/repeatability.json) |
+| Failure drill: worker stopped 90 s → **156 of 750** decisions stored as scoreless reviews, **0** HTTP errors, automatic recovery | Real thresholds, 5 transactions/s. [walkthrough](reports/dashboard/walkthrough.json) |
+| **2,221** demo requests → **2,221** new decisions, **0** dead-lettered events, including a SIGKILLed worker and cancelled jobs | Repeatability check on a clean setup. [report](reports/dashboard/repeatability.json) |
 | 100 rps with p95 12.1 ms in one benchmark run, **but only 4 of 6** sustained runs per model met the latency criterion | Latency on this machine is **inconsistent**; cause not established. [diagnosis](reports/serving_diagnosis/summary.md) |
 
 ## Launch in brief
@@ -63,7 +63,11 @@ make dashboard                        # open http://127.0.0.1:8200
 
 * **Synthetic data only**; nothing here is evidence about real payments or real savings.
 * Both models essentially **miss scenario 2** (compromised terminals, ~60% of simulated fraud;
-  recall ≈ 0.01). Calibration is not evaluated.
+  recall ≈ 0.01).
+* Scores are **risk scores, not probabilities.** Calibration was examined only for the
+  comparison-stage models on development folds (raw ECE: logistic regression 0.0028–0.0034,
+  XGBoost 0.0015–0.0027; Platt scaling did not consistently improve it); the deployed artifact
+  `lr-f1-6f0ebad8fcc7` has no calibration evaluation of its own.
 * **Sustained latency is inconsistent** on this machine; the project does not claim reliable
   100 rps.
 * Local deployment only (single machine, one API process, local HTTP, in-memory console
@@ -197,7 +201,22 @@ make check                    # ruff, mypy --strict, unit tests, isolated integr
 make test-integration         # integration tests only, on disposable services
 make test-services-down       # stop and discard those services
 make dashboard-test           # dashboard type check and component tests
+make smoke                    # browser smoke test (needs `make dashboard-build` first)
+make docs-check               # documentation links and evidence consistency
 ```
+
+**Browser smoke test (in CI).** `make smoke` starts the real console service and the production
+dashboard build in Google Chrome against a disposable PostgreSQL database seeded with 64
+deterministic decisions, and checks: anonymous API reads rejected; session cookie protections;
+the live, investigation and health views load; pagination in both lists; a decision's stored
+model, policy and registry identities and its policy rule; an analyst review saved without
+changing the decision; logout invalidating the session. It does **not** run the scoring API,
+Kafka, Redis or the worker (the health view must report the scoring API as unavailable), so it is
+not a test of the streaming system; the failure drill stays in the full walkthrough below.
+
+**Evidence consistency.** `scripts/check_evidence.py` recomputes the figures quoted in this README,
+the model card, the release notes and the demo script from the committed reports and fails if a
+document disagrees. It re-measures nothing.
 
 Integration tests never touch the application's services. `make test-integration` starts a
 separate Compose project (`docker-compose.test.yml`, project `fraud-itest`, ports 5543, 6480 and
@@ -236,8 +255,8 @@ Simulated data; one Apple M1 laptop; see each source for conditions.
 | Active review-only policy `pol-6164cb21826d` | development review rates 0.88–1.03% by week; **no held-out result** | [json](reports/serving_diagnosis/baseline_review_only_policy.json) |
 | End-to-end benchmark (one run, 2026-09-24, LR + frozen policy) | 100 rps: 6,000/6,000 scored, p50 7.2 ms, p95 12.1 ms, p99 17.7 ms; decision → feature applied p95 87 ms. **Not reproduced consistently:** see the next row | [report](reports/benchmarks/e2e.md) |
 | Serving diagnosis (12 runs at 100 rps) | criterion met in 4/6 runs for each model; cause of failures not established | [summary](reports/serving_diagnosis/summary.md) |
-| Dashboard failure drill (worker stopped 90 s at 5/s) | 750 decisions: 157 scoreless reviews, 0 HTTP errors; worker restarted automatically | [walkthrough](reports/dashboard/walkthrough.json) |
-| Dashboard polling (one tab, live view) | 44 console requests/min; mean console response 9–46 ms per endpoint | [walkthrough](reports/dashboard/walkthrough.json) |
+| Dashboard failure drill (worker stopped 90 s at 5/s) | 750 decisions: 156 scoreless reviews, 0 HTTP errors; worker restarted automatically | [walkthrough](reports/dashboard/walkthrough.json) |
+| Dashboard polling (one tab, live view) | 44 console requests/min; mean console response 6.7–62.1 ms per endpoint | [walkthrough](reports/dashboard/walkthrough.json) |
 
 ## Screenshots
 
