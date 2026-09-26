@@ -30,7 +30,9 @@ models, policies and results are unchanged.
 * **Experiment tracking and dashboard:** the completed run is imported into MLflow as a historical
   run, and the dashboard's historical results show a labelled "Real-data offline benchmark" entry.
 * **Integration-test harness:** the Redis-outage tests now verify the disposable Redis container
-  while it is running and record its immutable ID. They pause it and clean up by that ID in a
+  while it is running and record its immutable ID. Ownership is an explicit label,
+  `fraudplat.test-resource=disposable-redis`. It is set only by `docker-compose.test.yml` and by
+  the CI Redis service container, which has no Compose labels. They pause it and clean up by that ID in a
   `finally` clause, without re-checking ownership through `docker port`, which reports nothing
   for a paused container on Docker Engine 29.8.0. Cleanup failures are attached to the original
   test failure. `make test-redis-recover` unpauses only the verified test container after an

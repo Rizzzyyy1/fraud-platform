@@ -11,6 +11,8 @@ from typing import Any
 import pytest
 
 from ..safety import (
+    OWNERSHIP_LABEL,
+    OWNERSHIP_VALUE,
     TEST_COMPOSE_PROJECT,
     OutageCleanupError,
     UnsafeTestTarget,
@@ -113,15 +115,12 @@ class FakeDocker:
         self.calls: list[list[str]] = []
         self.fail_unpause = False
 
-    def add(self, cid: str, name: str, project: str | None, host_port: str) -> None:
-        labels = {"com.docker.compose.service": "redis"}
-        if project:
-            labels["com.docker.compose.project"] = project
+    def add(self, cid: str, name: str, labels: dict[str, str], host_port: str) -> None:
         bind = {"6379/tcp": [{"HostIp": "127.0.0.1", "HostPort": host_port}]}
         self.containers[cid] = {
             "Id": cid,
             "Name": f"/{name}",
-            "Config": {"Labels": labels},
+            "Config": {"Labels": dict(labels)},
             "State": {"Status": "running", "Paused": False},
             "NetworkSettings": {"Ports": bind},
             "HostConfig": {"PortBindings": bind},
@@ -163,9 +162,17 @@ class FakeDocker:
         return [c for c in self.calls if c[0] in {"pause", "unpause"}]
 
 
+OWNED = {OWNERSHIP_LABEL: OWNERSHIP_VALUE}
+COMPOSE_TEST = {
+    **OWNED,
+    "com.docker.compose.project": TEST_COMPOSE_PROJECT,
+    "com.docker.compose.service": "redis",
+}
+
+
 def fake_test_redis() -> FakeDocker:
     fake = FakeDocker()
-    fake.add(REDIS_ID, "fraud-itest-redis-1", TEST_COMPOSE_PROJECT, "6480")
+    fake.add(REDIS_ID, "fraud-itest-redis-1", COMPOSE_TEST, "6480")
     return fake
 
 
@@ -216,24 +223,64 @@ def test_cleanup_failure_alone_is_raised() -> None:
         pass
 
 
+APP_COMPOSE = {
+    "com.docker.compose.project": "fraud-platform",
+    "com.docker.compose.service": "redis",
+}
+
+
 @pytest.mark.parametrize(
-    ("project", "host_port", "reason"),
+    ("labels", "host_port", "reason"),
     [
-        ("fraud-platform", "6420", "application Compose project"),
-        ("fraud-review", "6480", "another project on the test port"),
-        (None, "6480", "no Compose labels"),
-        (TEST_COMPOSE_PROJECT, "6420", "test labels but the application's Redis port"),
-        (TEST_COMPOSE_PROJECT, "7000", "not the test Redis port"),
+        (APP_COMPOSE, "6420", "application Compose container, no ownership label"),
+        ({**APP_COMPOSE, **OWNED}, "6480", "ownership label copied onto an application container"),
+        ({"com.docker.compose.project": "fraud-review"}, "6480", "other project, test port"),
+        ({}, "6380", "unlabelled container on the CI test port (unrelated service)"),
+        ({OWNERSHIP_LABEL: "something-else"}, "6480", "wrong ownership value"),
+        (COMPOSE_TEST, "6420", "owned, but publishes the application's Redis port"),
+        (OWNED, "7000", "owned, but not on the test Redis port"),
     ],
 )
 def test_refuses_to_pause_unowned_or_application_containers(
-    project: str | None, host_port: str, reason: str
+    labels: dict[str, str], host_port: str, reason: str
 ) -> None:
     fake = FakeDocker()
-    fake.add("a" * 64, "some-redis", project, host_port)
+    fake.add("a" * 64, "some-redis", labels, host_port)
     with pytest.raises(UnsafeTestTarget):
         verify_outage_target("some-redis", TEST_URL, APP_URL, fake)
     assert fake.actions() == [], reason
+
+
+def test_ci_service_container_with_the_ownership_label_is_supported() -> None:
+    """GitHub Actions service containers have no Compose labels; the CI workflow sets the
+    ownership label through `options`, and the job passes `job.services.redis.id`."""
+    ci_id = "d" * 64
+    fake = FakeDocker()
+    fake.add(ci_id, "redis-service", OWNED, "6380")
+    ci_url = "redis://127.0.0.1:6380/15"
+    target = verify_outage_target(ci_id, ci_url, None, fake)  # CI: no application Redis
+    assert target.container_id == ci_id and target.provisioner.startswith("unmanaged")
+    with pytest.raises(AssertionError, match="test failed"), redis_outage(target, fake):
+        raise AssertionError("test failed")
+    assert not fake.paused(ci_id)
+    assert fake.actions() == [["pause", ci_id], ["unpause", ci_id]]
+
+
+def _service_block(text: str, header: str, next_header: str) -> str:
+    start = text.index(header)
+    return text[start : text.index(next_header, start)]
+
+
+def test_ownership_label_is_set_only_by_the_disposable_test_provisioners() -> None:
+    root = Path(__file__).resolve().parents[2]
+    ci = (root / ".github/workflows/ci.yml").read_text()
+    ci_redis = _service_block(ci, "\n      redis:\n", "\n      kafka:\n")
+    assert f"--label {OWNERSHIP_LABEL}={OWNERSHIP_VALUE}" in ci_redis
+    assert "FRAUD_TEST_REDIS_CONTAINER: ${{ job.services.redis.id }}" in ci
+    compose = (root / "docker-compose.test.yml").read_text()
+    test_redis = _service_block(compose, "\n  redis:\n", "\n  kafka:\n")
+    assert f"{OWNERSHIP_LABEL}: {OWNERSHIP_VALUE}" in test_redis
+    assert OWNERSHIP_LABEL not in (root / "docker-compose.yml").read_text()  # the application's
 
 
 def test_refuses_an_already_paused_or_missing_container() -> None:
@@ -255,7 +302,7 @@ def test_cleanup_never_unpauses_a_different_container() -> None:
     with pytest.raises(OutageCleanupError, match="refused"), redis_outage(target, fake):
         # The verified container disappears and an unrelated one takes its name.
         del fake.containers[REDIS_ID]
-        fake.add("b" * 64, "fraud-itest-redis-1", "fraud-platform", "6420")
+        fake.add("b" * 64, "fraud-itest-redis-1", APP_COMPOSE, "6420")
     assert fake.actions() == [["pause", REDIS_ID]]
 
 
@@ -266,7 +313,7 @@ def test_recovery_unpauses_only_the_owned_test_redis() -> None:
     assert not fake.paused()
     assert "was not paused" in recover_redis(REDIS_ID, TEST_URL, APP_URL, fake)
     app = FakeDocker()
-    app.add("c" * 64, "fraud-redis-1", "fraud-platform", "6420")
+    app.add("c" * 64, "fraud-redis-1", APP_COMPOSE, "6420")
     app(["pause", "c" * 64])
     with pytest.raises(UnsafeTestTarget):
         recover_redis("fraud-redis-1", TEST_URL, APP_URL, app)

@@ -9,9 +9,13 @@ only against an explicitly designated, disposable test target that is not the ap
   integration tests run on isolated services (`docker-compose.test.yml`).
 * Redis: database 15 only, on a server other than the application's (`FRAUD_REDIS_URL`).
 * Kafka: a bootstrap address other than the application's (`FRAUD_KAFKA_BOOTSTRAP`).
-* Outage tests: the container must be named explicitly (`FRAUD_TEST_REDIS_CONTAINER`), belong to
-  the disposable Compose project (`fraud-itest`, service `redis`), be running, and publish Redis
-  on the test Redis port, which must not be the application's port. Its immutable container ID is
+* Outage tests: the container must be named explicitly (`FRAUD_TEST_REDIS_CONTAINER`), carry the
+  ownership label `fraudplat.test-resource=disposable-redis`, be running, and publish Redis on the
+  test Redis port, which must not be the application's port. The label is the ownership contract.
+  Only the disposable test provisioners set it: `docker-compose.test.yml` (project `fraud-itest`)
+  and the CI workflow's Redis service container. The application's Compose file must never set
+  it, and a unit test enforces all three. A container that also carries a Compose project label
+  must belong to `fraud-itest`. Its immutable container ID is
   recorded at that point, and the pause and the cleanup act on that exact ID only. Cleanup does not
   re-derive ownership from `docker port`, which reports nothing for a paused container on some
   Docker Engine versions.
@@ -40,7 +44,10 @@ from urllib.parse import urlsplit
 from psycopg.conninfo import conninfo_to_dict
 
 TEST_COMPOSE_PROJECT = "fraud-itest"  # the Makefile's ITEST project; a unit test keeps them equal
-TEST_REDIS_SERVICE = "redis"
+# Ownership contract for containers the outage tests may pause (set by docker-compose.test.yml and
+# the CI Redis service; never by docker-compose.yml). Unit tests check all three files.
+OWNERSHIP_LABEL = "fraudplat.test-resource"
+OWNERSHIP_VALUE = "disposable-redis"
 RESERVED_DATABASES = frozenset({"fraud", "postgres", "mlflow", "template0", "template1"})
 _LOOPBACK = {"localhost", "127.0.0.1", "::1", ""}
 
@@ -151,7 +158,7 @@ class OutageTarget:
 
     container_id: str  # immutable full ID; every later action uses this, never the name
     name: str
-    project: str
+    provisioner: str  # "compose project fraud-itest" or "unmanaged (e.g. CI service container)"
     test_port: int
 
 
@@ -170,15 +177,20 @@ def _published(ports: dict[str, Any] | None) -> str:
 
 
 def _assert_owned(ref: str, info: dict[str, Any]) -> str:
+    """Check the ownership label; return how the container was provisioned."""
     labels = (info.get("Config") or {}).get("Labels") or {}
-    project = labels.get("com.docker.compose.project")
-    service = labels.get("com.docker.compose.service")
-    if project != TEST_COMPOSE_PROJECT or service != TEST_REDIS_SERVICE:
+    if labels.get(OWNERSHIP_LABEL) != OWNERSHIP_VALUE:
         raise UnsafeTestTarget(
-            f"container {ref!r} is not the disposable test Redis (Compose project {project!r}, "
-            f"service {service!r}; expected {TEST_COMPOSE_PROJECT!r}, {TEST_REDIS_SERVICE!r})"
+            f"container {ref!r} is not a disposable test Redis: label {OWNERSHIP_LABEL!r} is "
+            f"{labels.get(OWNERSHIP_LABEL)!r}, expected {OWNERSHIP_VALUE!r}"
         )
-    return str(project)
+    project = labels.get("com.docker.compose.project")
+    if project is not None and project != TEST_COMPOSE_PROJECT:
+        raise UnsafeTestTarget(
+            f"container {ref!r} carries the test label but belongs to Compose project {project!r}"
+            f", not {TEST_COMPOSE_PROJECT!r}"
+        )
+    return f"compose project {project}" if project else "unmanaged (e.g. CI service container)"
 
 
 def verify_outage_target(
@@ -188,7 +200,7 @@ def verify_outage_target(
     if not container:
         raise UnsafeTestTarget("set FRAUD_TEST_REDIS_CONTAINER to the disposable test Redis")
     info = _inspect(container, run)
-    project = _assert_owned(container, info)
+    provisioner = _assert_owned(container, info)
     state = info.get("State") or {}
     if state.get("Paused") or state.get("Status") != "running":
         raise UnsafeTestTarget(
@@ -203,7 +215,7 @@ def verify_outage_target(
     return OutageTarget(
         container_id=str(info["Id"]),
         name=str(info.get("Name", "")).lstrip("/"),
-        project=project,
+        provisioner=provisioner,
         test_port=redis_target(test_redis_url)[0].port,
     )
 
@@ -279,11 +291,11 @@ def recover_redis(
     if not container:
         raise UnsafeTestTarget("no disposable test Redis container found")
     info = _inspect(container, run)
-    project = _assert_owned(container, info)
+    provisioner = _assert_owned(container, info)
     configured = _published((info.get("HostConfig") or {}).get("PortBindings"))
     assert_outage_container(container, configured, test_redis_url, app_redis_url)
     target = OutageTarget(
-        str(info["Id"]), str(info.get("Name", "")).lstrip("/"), project,
+        str(info["Id"]), str(info.get("Name", "")).lstrip("/"), provisioner,
         redis_target(test_redis_url)[0].port,
     )  # fmt: skip
     was_paused = bool((info.get("State") or {}).get("Paused"))

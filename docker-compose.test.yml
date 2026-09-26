@@ -25,6 +25,9 @@ services:
     image: redis:8-alpine
     command: ["redis-server", "--maxmemory", "256mb", "--maxmemory-policy", "noeviction",
               "--save", "", "--appendonly", "no"]
+    labels:
+      # Ownership contract read by tests/safety.py: only disposable test Redis carries it.
+      fraudplat.test-resource: disposable-redis
     ports:
       - "127.0.0.1:${ITEST_REDIS_PORT:-6480}:6379"
     healthcheck:

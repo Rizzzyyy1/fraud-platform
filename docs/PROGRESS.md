@@ -601,8 +601,11 @@ build (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126). Re
 * Redis-outage test fix: on Docker Engine 29.8.0, `docker port` reports nothing for a paused
   container. The old helper re-checked ownership that way before unpausing, so it refused to
   unpause and left the test Redis paused, and later integration tests failed. The helper now
-  verifies the container while it is running (Compose project and service labels, running state,
-  test port and not the application's), records its immutable ID, and pauses and cleans up by
+  verifies the container while it is running. Ownership is the explicit label
+  `fraudplat.test-resource=disposable-redis`, set by `docker-compose.test.yml` and by the CI Redis
+  service container, which has no Compose labels. The helper also checks the running state and
+  the test port (not the application's), and rejects a Compose project other than `fraud-itest`.
+  It records its immutable ID, and pauses and cleans up by
   that ID in a `finally` clause. A cleanup failure is attached to the test's original failure
   rather than replacing it. Regression tests use a fake Docker that reproduces the engine
   behaviour. `make test-redis-recover` unpauses only a verified test container after a killed

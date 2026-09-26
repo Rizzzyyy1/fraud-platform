@@ -230,8 +230,11 @@ separate Compose project (`docker-compose.test.yml`, project `fraud-itest`, port
 down, truncating, flushing, deleting topics, pausing a container) a guard in `tests/safety.py`
 refuses targets that are the application's database, Redis or Kafka, or on the same server, and
 the Redis-outage tests pause only a container named explicitly in `FRAUD_TEST_REDIS_CONTAINER`.
-Before pausing, that container is checked while running: Compose project `fraud-itest`, service
-`redis`, and published on the test Redis port, not the application's. Its immutable container ID
+Before pausing, that container is checked while it is running. It must carry the ownership label
+`fraudplat.test-resource=disposable-redis`, set only by `docker-compose.test.yml` and by the CI
+workflow's Redis service container (a unit test checks both, and checks that the application's
+`docker-compose.yml` never sets it). It must also publish the test Redis port and not the
+application's. If it carries a Compose project label, the project must be `fraud-itest`. Its immutable container ID
 is recorded, and the pause and the cleanup act on that ID only. Cleanup runs in a `finally` clause,
 after assertion failures and exceptions too. If cleanup itself fails, the error is attached to the
 test's original failure rather than replacing it.
@@ -239,11 +242,11 @@ test's original failure rather than replacing it.
 A `finally` clause cannot run if the test process is killed (SIGKILL, an interpreter crash, the
 machine stopping), so an interrupted run can leave the test Redis paused. The next outage test then
 refuses to start and says so. To recover, run `make test-redis-recover`. It finds the `redis`
-service of the `fraud-itest` project and checks its Compose labels and configured port binding,
+service of the `fraud-itest` project and checks its ownership label and configured port binding,
 which Docker keeps while a container is paused. It unpauses the container only if those checks
-pass, and never acts on any other container. The manual equivalent is to verify
-`docker inspect -f '{{index .Config.Labels "com.docker.compose.project"}}' <id>` prints
-`fraud-itest`, then run `docker unpause <id>`.
+pass, and never acts on any other container. The manual equivalent is to verify that
+`docker inspect -f '{{index .Config.Labels "fraudplat.test-resource"}}' <id>` prints
+`disposable-redis`, then run `docker unpause <id>`.
 
 Browser walkthrough (running stack and an admin account; every check is an assertion and failures
 keep evidence in `run/e2e-evidence/`):
