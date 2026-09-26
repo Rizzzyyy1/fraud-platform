@@ -1,0 +1,320 @@
+"""Reproducibility rerun of the frozen ULB benchmark, with saved artifacts and a comparison.
+
+    python -m fraudplat.external.reproduce [--out DIR]
+
+The original run (`fraudplat.external.benchmark`, results in `reports/external/ulb/benchmark.json`)
+saved metrics only. This rerun repeats it with the committed protocol code, split boundaries, seeds
+and the configurations the original run selected (read from the reference JSON; no grid search,
+no new thresholds, no model choice), and this time keeps what the original did not:
+
+* the fitted models: logistic regression as plain JSON parameters (scaler mean and scale,
+  coefficients, intercept) and XGBoost in its native JSON format;
+* the feature order and schema, the selected configurations and validation thresholds;
+* the dataset checksum, the code revision and the dependency versions;
+* per-transaction scores and labels for the validation and test windows (Parquet);
+* the reproduced metrics, a metric-by-metric comparison with the reference JSON, and a manifest
+  of SHA-256 checksums for every file.
+
+Everything is written to a git-ignored directory under `artifacts/` (default
+`artifacts/external/ulb/reproduction/<UTC time>/`) and is not published: row-level data,
+predictions and model files stay local until their publication suitability is checked. The
+reference report is read, never written; `--out` refuses any path under `reports/`. Differences
+from the reference are reported as measured, not reconciled.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+import platform
+import subprocess
+import sys
+from datetime import UTC, datetime
+from importlib.metadata import version
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+import polars as pl
+from sklearn.metrics import average_precision_score, roc_auc_score
+from sklearn.model_selection import train_test_split
+from xgboost import XGBClassifier
+
+from fraudplat.external import benchmark as bm
+from fraudplat.external.ulb import DIR, FEATURES, MD5, load
+
+REFERENCE = bm.OUT
+ARTIFACTS = Path("artifacts/external/ulb/reproduction")
+PACKAGES = ("numpy", "polars", "scikit-learn", "xgboost", "scipy")
+# Differences at or below this are floating-point noise, not a changed result.
+TOLERANCE = 1e-9
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for block in iter(lambda: source.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def git(*args: str) -> str:
+    try:
+        return subprocess.run(  # noqa: S603
+            ["git", *args],  # noqa: S607
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+
+
+def environment() -> dict[str, Any]:
+    arff = DIR / "creditcard.arff"
+    md5 = hashlib.md5(arff.read_bytes(), usedforsecurity=False).hexdigest()
+    if md5 != MD5:
+        raise SystemExit(f"dataset checksum {md5} != {MD5}: not the benchmark's data")
+    lock = Path("uv.lock")
+    return {
+        "dataset_md5": md5,
+        "code_revision": git("rev-parse", "HEAD"),
+        "code_dirty": bool(git("status", "--porcelain", "--", "src", "uv.lock")),
+        "protocol_sha256": sha256(Path(bm.__file__)),
+        "uv_lock_sha256": sha256(lock) if lock.exists() else None,
+        "python": sys.version.split()[0],
+        "platform": platform.platform(terse=True),
+        "machine": platform.machine(),
+        "packages": {p: version(p) for p in PACKAGES},
+    }
+
+
+def lr_params(model: Any) -> dict[str, Any]:
+    scaler, lr = model.steps[0][1], model.steps[1][1]
+    return {
+        "format": "standardise then logistic: p = 1 / (1 + exp(-(((x - mean) / scale) . coef "
+        "+ intercept)))",
+        "features": FEATURES,
+        "mean": scaler.mean_.tolist(),
+        "scale": scaler.scale_.tolist(),
+        "coef": lr.coef_[0].tolist(),
+        "intercept": float(lr.intercept_[0]),
+    }
+
+
+def lr_score(params: dict[str, Any], x: np.ndarray) -> np.ndarray:
+    z = ((x - np.array(params["mean"])) / np.array(params["scale"])) @ np.array(params["coef"])
+    return np.asarray(1.0 / (1.0 + np.exp(-(z + params["intercept"]))))
+
+
+def evaluate(family: str, config: dict[str, Any], data: pl.DataFrame) -> dict[str, Any]:
+    """The committed protocol for one fixed configuration (bm.main, minus the grid)."""
+    train, valid, test = (bm.window(data, b) for b in (bm.TRAIN, bm.VALID, bm.TEST))
+    (xt, yt), (xv, yv), (xs, ys) = bm.xy(train), bm.xy(valid), bm.xy(test)
+    model = bm.build(family, config).fit(xt, yt)
+    pv = model.predict_proba(xv)[:, 1]
+    threshold = float(np.sort(pv)[::-1][math.ceil(bm.BUDGET * len(pv)) - 1])
+    ps = model.predict_proba(xs)[:, 1]
+    hours = (test["Time"].to_numpy() // bm.HOUR).astype(int)
+    xa, ya = bm.xy(data)
+    xr_tr, xr_te, yr_tr, yr_te = train_test_split(
+        xa, ya, test_size=0.3, stratify=ya, random_state=bm.SEED
+    )
+    random_ap = float(
+        average_precision_score(
+            yr_te, bm.build(family, config).fit(xr_tr, yr_tr).predict_proba(xr_te)[:, 1]
+        )
+    )
+    return {
+        "model": model,
+        "validation_scores": pv,
+        "test_scores": ps,
+        "metrics": {
+            "selected": config,
+            "validation_ap": float(average_precision_score(yv, pv)),
+            "threshold_from_validation": threshold,
+            "test": {
+                "average_precision": float(average_precision_score(ys, ps)),
+                "roc_auc": float(roc_auc_score(ys, ps)),
+                "at_fixed_threshold": bm.at_threshold(ys, ps, threshold),
+                "ece_raw": bm.ece(ys, ps),
+                "mean_score": float(ps.mean()),
+                "fraud_rate": float(ys.mean()),
+                "ci95": bm.hour_block_ci(ys, ps, hours, threshold),
+            },
+            "random_split_contrast_ap": random_ap,
+        },
+    }
+
+
+def flatten(value: Any, prefix: str = "") -> dict[str, float]:
+    if isinstance(value, dict):
+        out: dict[str, float] = {}
+        for k, v in value.items():
+            out.update(flatten(v, f"{prefix}.{k}" if prefix else str(k)))
+        return out
+    if isinstance(value, list):
+        return {f"{prefix}[{i}]": float(v) for i, v in enumerate(value)}
+    return {prefix: float(value)}
+
+
+def compare(reference: dict[str, Any], reproduced: dict[str, Any]) -> dict[str, Any]:
+    rows = []
+    for family, rep in reproduced.items():
+        ref = {k: v for k, v in reference["families"][family].items() if k != "grid"}
+        a, b = flatten(ref), flatten(rep)
+        for key in sorted(a.keys() | b.keys()):
+            ra, rb = a.get(key), b.get(key)
+            diff = None if ra is None or rb is None else abs(ra - rb)
+            rows.append(
+                {
+                    "family": family,
+                    "metric": key,
+                    "reference": ra,
+                    "reproduced": rb,
+                    "abs_diff": diff,
+                    "within_tolerance": diff is not None and diff <= TOLERANCE,
+                }
+            )
+    return {
+        "tolerance": TOLERANCE,
+        "all_within_tolerance": all(r["within_tolerance"] for r in rows),
+        "max_abs_diff": max((r["abs_diff"] or 0.0) for r in rows),
+        "rows": rows,
+    }
+
+
+def write_json(path: Path, value: Any) -> None:
+    path.write_text(json.dumps(value, indent=2) + "\n")
+
+
+def reproduce(out: Path) -> dict[str, Any]:
+    reports = Path("reports").resolve()
+    if out.resolve() == reports or reports in out.resolve().parents:
+        raise SystemExit("refusing to write under reports/: the reference report is not replaced")
+    if out.exists() and any(out.iterdir()):
+        raise SystemExit(f"{out} is not empty")
+    reference: dict[str, Any] = json.loads(REFERENCE.read_text())
+    started = datetime.now(UTC)
+    env = environment()
+    data = load()
+    out.mkdir(parents=True, exist_ok=True)
+    reproduced: dict[str, Any] = {}
+    columns: dict[str, Any] = {}
+    parity: dict[str, float] = {}
+    for family, ref in reference["families"].items():
+        config = ref["selected"]
+        best = max(ref["grid"], key=lambda t: t["validation_ap"])["config"]
+        if best != config:
+            raise SystemExit(f"{family}: reference selection is inconsistent with its grid")
+        result = evaluate(family, config, data)
+        reproduced[family] = result["metrics"]
+        columns[f"{family}_score"] = np.concatenate(
+            [result["validation_scores"], result["test_scores"]]
+        )
+        (out / family).mkdir()
+        xs = bm.xy(bm.window(data, bm.TEST))[0]
+        if family == "lr":
+            params = lr_params(result["model"])
+            write_json(out / family / "model.json", params)
+            reloaded = lr_score(json.loads((out / family / "model.json").read_text()), xs)
+        else:
+            result["model"].save_model(out / family / "model.json")
+            clf = XGBClassifier()
+            clf.load_model(out / family / "model.json")
+            reloaded = clf.predict_proba(xs)[:, 1]
+        parity[family] = float(np.max(np.abs(reloaded - result["test_scores"])))
+    rows = pl.concat(
+        [
+            bm.window(data.with_row_index("row"), bm.VALID).with_columns(
+                pl.lit("validation").alias("window")
+            ),
+            bm.window(data.with_row_index("row"), bm.TEST).with_columns(
+                pl.lit("test").alias("window")
+            ),
+        ]
+    ).select("row", "window", "Time", "Class")
+    rows.with_columns(**{k: pl.Series(v) for k, v in columns.items()}).write_parquet(
+        out / "predictions.parquet"
+    )
+    finished = datetime.now(UTC)
+    write_json(
+        out / "schema.json",
+        {
+            "features": FEATURES,
+            "feature_dtype": "float64",
+            "label": "Class (int, 1 = fraud)",
+            "windows_seconds": {"train": bm.TRAIN, "validation": bm.VALID, "test": bm.TEST},
+            "predictions_columns": {
+                "row": "0-based row position in the OpenML ARFF",
+                "window": "validation or test",
+                "Time": "seconds since the first transaction",
+                "Class": "label",
+                "lr_score": "logistic regression probability",
+                "xgb_score": "XGBoost probability",
+            },
+        },
+    )
+    write_json(
+        out / "config.json",
+        {
+            "selected": {f: m["selected"] for f, m in reproduced.items()},
+            "thresholds_from_validation": {
+                f: m["threshold_from_validation"] for f, m in reproduced.items()
+            },
+            "review_budget": bm.BUDGET,
+            "seed": bm.SEED,
+            "bootstrap": bm.BOOTSTRAP,
+            "selection_source": f"{REFERENCE} (original run's grid); no search in this rerun",
+        },
+    )
+    comparison = compare(reference, reproduced)
+    run = {
+        "kind": "reproducibility rerun",
+        "reference": {
+            "report": str(REFERENCE),
+            "created_at": reference["created_at"],
+            "sha256": sha256(REFERENCE),
+            "saved_artifacts": "none (metrics only)",
+        },
+        "started_at": started.isoformat(timespec="seconds"),
+        "finished_at": finished.isoformat(timespec="seconds"),
+        "environment": env,
+        "reload_parity_max_abs_diff": parity,
+        "metrics": reproduced,
+        "comparison": comparison,
+    }
+    write_json(out / "run.json", run)
+    files = sorted(p for p in out.rglob("*") if p.is_file() and p.name != "manifest.json")
+    write_json(
+        out / "manifest.json",
+        {
+            "files": {
+                str(p.relative_to(out)): {"sha256": sha256(p), "bytes": p.stat().st_size}
+                for p in files
+            },
+            "publication": "local only; row-level data, predictions and models are not published",
+        },
+    )
+    return run
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    parser.add_argument("--out", type=Path, default=ARTIFACTS / stamp)
+    args = parser.parse_args()
+    run = reproduce(args.out)
+    c = run["comparison"]
+    print(
+        f"{args.out}: {len(c['rows'])} metrics compared, max abs diff {c['max_abs_diff']:.3g}, "
+        f"all within {c['tolerance']:g}: {c['all_within_tolerance']}; "
+        f"reload parity {run['reload_parity_max_abs_diff']}"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
