@@ -1,9 +1,22 @@
 # Release notes — v1.1.0 (real-data benchmark)
 
-Adds an offline benchmark of the modelling method on real data. The platform, its synthetic data,
-models, policies and results are unchanged.
+This release adds an **offline benchmark on real, public card-fraud data** (the ULB dataset). It is
+separate from the **live scoring platform**, which still runs only on the project's synthetic data
+with its existing models, policies and results. The benchmark's models were fitted offline and are
+not registered, deployed or used for live scoring. Its AP is not comparable with the synthetic-data
+results, because the two datasets and tasks differ.
 
-* **ULB credit-card data** (real, anonymised, 2 days, 492 frauds), downloaded from OpenML with a
+The demo video linked from the README is the earlier v1.0.0 recording of the synthetic-data
+platform. It does not show the real-data benchmark.
+
+Data: ULB credit-card fraud dataset (Worldline and the Machine Learning Group, Université Libre de
+Bruxelles). Please cite Dal Pozzolo, Caelen, Johnson and Bontempi, *Calibrating Probability with
+Undersampling for Unbalanced Classification*, CIDM (IEEE), 2015. Contains information from [Credit
+Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud), which is made
+available here under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/).
+
+* **ULB credit-card data** (real, anonymised, 2 days in September 2013, 284,807 transactions, 492
+  frauds). The benchmark ran on the OpenML 1597 v1 copy. It is downloaded by the user with a
   checksum check and never committed.
 * **Protocol committed before evaluation**; held-out window (elapsed hours 32–48) evaluated once:
   XGBoost AP 0.746 (95% CI 0.662–0.813), logistic regression 0.647 (0.507–0.752). Logistic
@@ -32,8 +45,8 @@ models, policies and results are unchanged.
 * **Integration-test harness:** the Redis-outage tests now verify the disposable Redis container
   while it is running and record its immutable ID. Ownership is an explicit label,
   `fraudplat.test-resource=disposable-redis`. It is set only by `docker-compose.test.yml` and by
-  the CI Redis service container, which has no Compose labels. They pause it and clean up by that ID in a
-  `finally` clause, without re-checking ownership through `docker port`, which reports nothing
+  the CI Redis service container, which has no Compose labels. The tests pause the container and
+  clean up by that ID in a `finally` clause, without re-checking ownership through `docker port`, which reports nothing
   for a paused container on Docker Engine 29.8.0. Cleanup failures are attached to the original
   test failure. `make test-redis-recover` unpauses only the verified test container after an
   interrupted run.

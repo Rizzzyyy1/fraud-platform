@@ -9,6 +9,9 @@ in a React console. A portfolio project; everything runs on one laptop at no cos
 
 **▶ [Watch the demo video (4 min 21 s, real time, captioned)](https://github.com/Rizzzyyy1/fraud-platform/releases/download/v1.0.0/fraud-platform-demo.webm)** · [Release v1.0.0](https://github.com/Rizzzyyy1/fraud-platform/releases/tag/v1.0.0)
 
+<sub>The video is the earlier v1.0.0 recording of the synthetic-data platform. It does not show the
+v1.1.0 real-data offline benchmark.</sub>
+
 <sub>Investigation view of a decision from the local demo deployment (historical capture,
 2026-09-25 walkthrough; see [screenshot provenance](docs/screenshots/README.md)). More:
 [live activity](docs/screenshots/02-live-activity.png) ·
