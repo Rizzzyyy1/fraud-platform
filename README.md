@@ -43,6 +43,7 @@ in a React console. A portfolio project; everything runs on one laptop at no cos
 | Held-out AP **0.357** (XGBoost candidate) vs **0.319** (LR baseline), non-overlapping 95% CIs | 301,001 held-out transactions, evaluated once. The candidate is **not promoted**. The **active** release is the LR baseline with a **review-only policy that has no held-out result** (development review rate 0.88–1.03%). [report](reports/release-1/test_evaluation.md) |
 | Failure drill: worker stopped 90 s → **156 of 750** decisions stored as scoreless reviews, **0** HTTP errors, automatic recovery | Real thresholds, 5 transactions/s. [walkthrough](reports/dashboard/walkthrough.json) |
 | **2,221** demo requests → **2,221** new decisions, **0** dead-lettered events, including a SIGKILLed worker and cancelled jobs | Repeatability check on a clean setup. [report](reports/dashboard/repeatability.json) |
+| Real data, offline: on the public ULB card-fraud data (real, anonymised, 2 days), time split, evaluated once: XGBoost AP 0.746 (95% CI 0.662–0.813) vs logistic regression 0.647 | Checks the modelling and evaluation method on real transactions; the platform itself still runs on synthetic data. [report](reports/external/ulb/benchmark.md) |
 | 100 rps with p95 12.1 ms in one benchmark run, **but only 4 of 6** sustained runs per model met the latency criterion | Latency on this machine is **inconsistent**; cause not established. [diagnosis](reports/serving_diagnosis/summary.md) |
 
 ## Launch in brief
@@ -61,7 +62,9 @@ make dashboard                        # open http://127.0.0.1:8200
 
 ## Limitations
 
-* **Synthetic data only**; nothing here is evidence about real payments or real savings.
+* **The platform runs on synthetic data**; nothing here is evidence about real payments or real
+  savings. The only real-data result is an offline benchmark on the anonymised ULB dataset, which
+  has no customer or merchant IDs and so cannot feed the streaming features.
 * Both models essentially **miss scenario 2** (compromised terminals, ~60% of simulated fraud;
   recall ≈ 0.01).
 * Scores are **risk scores, not probabilities.** Calibration was examined only for the

@@ -1,3 +1,19 @@
+# Release notes — v1.1.0 (real-data benchmark)
+
+Adds an offline benchmark of the modelling method on real data. The platform, its synthetic data,
+models, policies and results are unchanged.
+
+* **ULB credit-card data** (real, anonymised, 2 days, 492 frauds), downloaded from OpenML with a
+  checksum check and never committed.
+* **Protocol committed before evaluation**; held-out window (last 16 hours) evaluated once:
+  XGBoost AP 0.746 (95% CI 0.662–0.813), logistic regression 0.647 (0.507–0.752).
+* **Findings reported as measured:** a random split gave higher AP for both models (indicative of
+  optimism from ignoring time); a threshold fixed on validation produced a lower review rate than
+  its 0.5% budget on the test window.
+* Report: `reports/external/ulb/benchmark.md`; provenance: `THIRD_PARTY_NOTICES.md`.
+
+---
+
 # Release notes — v1.0.1 (maintenance)
 
 No models, policies, thresholds or held-out results changed; no evaluation or benchmark was rerun.

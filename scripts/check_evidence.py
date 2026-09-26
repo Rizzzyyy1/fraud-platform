@@ -161,6 +161,21 @@ def claims() -> list[tuple[str, list[str], str]]:
 
     text = f"raw ECE: logistic regression {ece('lr')}, XGBoost {ece('xgb')}"
     out.append(("comparison-stage calibration (report.json)", [README, MODEL_CARD, NOTES], text))
+    ulb = load("reports/external/ulb/benchmark.json")["families"]
+
+    def ulb_ap(family: str) -> str:
+        t = ulb[family]["test"]
+        lo, hi = t["ci95"]["average_precision"]
+        return f"{r(t['average_precision'], 3)} (95% CI {r(lo, 3)}{DASH}{r(hi, 3)})"
+
+    out.append(("ULB benchmark (benchmark.json)", [README, NOTES], f"XGBoost AP {ulb_ap('xgb')}"))
+    out.append(
+        (
+            "ULB benchmark (benchmark.json)",
+            [README, NOTES],
+            f"logistic regression {r(ulb['lr']['test']['average_precision'], 3)}",
+        )
+    )
     return out
 
 

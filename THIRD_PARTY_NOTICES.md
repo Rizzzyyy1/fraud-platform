@@ -55,3 +55,12 @@ build (LGPL-2.1), downloaded to the user's cache; neither is included.
 ## Media
 
 Screenshots and the demo video show only this project's own application and synthetic data.
+
+## External dataset: ULB credit-card fraud (offline benchmark only)
+
+Dal Pozzolo, Caelen, Johnson and Bontempi, *Calibrating Probability with Undersampling for
+Unbalanced Classification*, IEEE SSCI 2015; data from the Machine Learning Group, Université Libre
+de Bruxelles, and Worldline. Obtained from OpenML dataset 1597 (version 1, licence listed as
+"Public"; the Kaggle copy lists DbCL v1.0). `python -m fraudplat.external.ulb fetch` downloads it
+and checks OpenML's MD5; the data is **not redistributed** in this repository. Only derived
+aggregate metrics are committed (`reports/external/ulb/`).

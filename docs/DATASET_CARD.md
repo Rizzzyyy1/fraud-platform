@@ -83,3 +83,12 @@ instead of arrival time. Whether those differences change scores or actions was 
   validation (observed); the cause has not been established.
 * Arrival and label delays are simple parametric assumptions, not measurements.
 * Content hashes depend on Polars' CSV rendering; library versions are in each manifest.
+
+## External benchmark data: ULB credit-card fraud (real, offline only)
+
+284,807 real card transactions over 48 hours (September 2013), 492 frauds (0.17%). Features
+V1–V28 are PCA components released by the data owner, plus `Time` and `Amount`; no customer or
+merchant identifiers, no label delays, no currency. It is used only for the offline benchmark in
+`reports/external/ulb/benchmark.md` (split by time: train 0–24 h, validation 24–32 h, held-out
+32–48 h) and never enters the platform, its features or its models. Provenance and licence:
+`THIRD_PARTY_NOTICES.md`.

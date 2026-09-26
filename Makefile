@@ -1,4 +1,4 @@
-.PHONY: env install up down migrate serve test test-integration lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down smoke docs-check
+.PHONY: env install up down migrate serve test test-integration lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down smoke docs-check ulb-fetch ulb-report
 
 env:            ## create .env from the example (local development only)
 	@test -f .env || cp .env.example .env
@@ -34,6 +34,12 @@ test-integration: ## integration tests on disposable isolated services (never th
 smoke:          ## browser smoke test: real console + built dashboard on a seeded disposable database (no streaming)
 	$(ITEST) up -d --wait postgres
 	uv run python scripts/browser_smoke.py --admin-url postgresql://fraud:itest-only@127.0.0.1:5543/postgres
+
+ulb-fetch:      ## download and verify the real ULB dataset (offline benchmark only; not committed)
+	uv run python -m fraudplat.external.ulb fetch
+
+ulb-report:     ## re-render the ULB benchmark report from its committed JSON (no recomputation)
+	uv run python -m fraudplat.external.report
 
 docs-check:     ## documentation links and evidence consistency
 	uv run python scripts/check_doc_links.py

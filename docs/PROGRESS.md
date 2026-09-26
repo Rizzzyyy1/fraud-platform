@@ -581,3 +581,10 @@ build (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126). Re
 * Browser smoke test added to CI (real console and dashboard build, seeded disposable database;
   not the streaming system). The failure drill remains in the full local walkthrough.
 * This public repository is the source of truth for future public development (`PROVENANCE.md`).
+
+## v1.1.0 real-data benchmark
+
+* Offline benchmark on the real ULB card-fraud data (`reports/external/ulb/benchmark.md`),
+  protocol committed before the held-out window was evaluated once. XGBoost AP 0.746 vs logistic
+  regression 0.647 on the last 16 hours; random split higher for both; validation threshold gave a
+  lower-than-budgeted review rate. No change to the platform or its results.
