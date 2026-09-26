@@ -58,19 +58,44 @@ Screenshots and the demo video show only this project's own application and synt
 
 ## External dataset: ULB credit-card fraud (offline benchmark only)
 
-**Origin and citation.** Machine Learning Group, Université Libre de Bruxelles, with Worldline;
-Dal Pozzolo, Caelen, Johnson and Bontempi, *Calibrating Probability with Undersampling for
-Unbalanced Classification*, IEEE SSCI 2015.
+**Origin.** Transactions by European cardholders in September 2013, collected and analysed in a
+research collaboration of Worldline and the Machine Learning Group (MLG) of the Université Libre
+de Bruxelles (ULB). Creators listed by OpenML: Andrea Dal Pozzolo, Olivier Caelen, Gianluca
+Bontempi.
 
-**Licensing metadata as recorded by each distributor (recorded, not interpreted):**
+**Attribution requested by the sources.** Both distributors ask users to cite: Andrea Dal Pozzolo,
+Olivier Caelen, Reid A. Johnson and Gianluca Bontempi, *Calibrating Probability with
+Undersampling for Unbalanced Classification*, Symposium on Computational Intelligence and Data
+Mining (CIDM), IEEE, 2015. The Kaggle page lists further MLG publications to cite; OpenML's terms
+additionally ask users to credit the authors whose work they build on.
 
-| Source | Recorded licence | Accessed |
-|---|---|---|
-| OpenML dataset 1597, version 1 (the copy downloaded here) | licence field: "Public" | 2026-09-26 |
-| Kaggle dataset "Credit Card Fraud Detection" (mlg-ulb) | Database Contents License (DbCL) v1.0 | from its dataset page; not re-verified here |
-| Original data owners (ULB MLG / Worldline) | terms not independently verified | — |
+**Source terms, checked at the source on 2026-09-26 (recorded, not interpreted; not legal
+advice):**
 
-A distributor's label is not treated as permission overriding the original owners' terms. The raw
-data is **not redistributed**: `python -m fraudplat.external.ulb fetch` downloads it into the
-git-ignored `data/` directory and checks OpenML's MD5 (`178bcf9bb1f31a3dfe12d0e577884add`). Only
-derived aggregate metrics are committed (`reports/external/ulb/`).
+| Source (URL) | What the source states |
+|---|---|
+| OpenML dataset 1597 v1, the copy downloaded here: `https://www.openml.org/api/v1/json/data/1597` (file `https://openml.org/data/v1/download/1673544/creditcard.arff`, MD5 `178bcf9bb1f31a3dfe12d0e577884add`, uploaded 2015-06-25) | `licence` field: "Public". This is not a licence and is not treated as one. No `original_data_url` or licence text is given. |
+| OpenML terms of use: `https://www.openml.org/terms` | OpenML's own data and metadata are CC-BY. Individual datasets may carry their own citation requests, which users are asked to honour. Uploaders grant users a non-exclusive licence to use content for their own research, subject to the uploader's licences. Anyone distributing content from OpenML affirms they hold the necessary rights. |
+| Kaggle dataset `mlg-ulb/creditcardfraud`: `https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud` (API `https://www.kaggle.com/api/v1/datasets/view/mlg-ulb/creditcardfraud`; owner "Machine Learning Group - ULB", version 3, updated 2018-03-23) | Licence: Open Database License (ODbL) v1.0 for the database, and Database Contents License (DbCL) v1.0 for its contents. |
+| DbCL v1.0: `https://opendatacommons.org/licenses/dbcl/1-0/` | A worldwide, royalty-free copyright licence to the contents, commercial use included. ODbL definitions are incorporated by reference. |
+| MLG project pages cited in the dataset description (`http://mlg.ulb.ac.be/BruFence`, `http://mlg.ulb.ac.be/ARTML`) | Not reachable on 2026-09-26 (HTTP 404). No terms were obtained directly from ULB MLG or Worldline. |
+
+**Unresolved, so licensing is not declared complete:**
+
+1. **The terms of the copy used.** The data here came from OpenML, which states no licence. The
+   ODbL/DbCL terms appear on the Kaggle listing, a separate distribution. Neither source says
+   whether those terms cover the OpenML copy.
+2. **No statement from the owners.** Nothing was obtained directly from ULB MLG or Worldline, so
+   the distributors' terms could not be confirmed with the original owners.
+3. **Obligations for derived artifacts, if ODbL governs.** ODbL attaches notice and share-alike
+   conditions to publicly used derivative databases, and notice conditions to produced works.
+   Whether these apply to the local rerun artifacts (per-transaction scores joined to labels, and
+   the fitted models) needs a qualified legal reading. That reading has not been done.
+
+**What is and is not published.** The raw data is **not redistributed**. `python -m
+fraudplat.external.ulb fetch` downloads it into the git-ignored `data/` directory and verifies
+OpenML's MD5. The committed files under `reports/external/ulb/` hold aggregate metrics, checksums
+and environment details only, and carry the attribution above. The rerun artifacts stay local
+and are not published: the per-transaction predictions (with labels) and the fitted model files,
+under git-ignored `artifacts/`. Keeping these files out resolves only part of the question.
+Items 1–3 remain open before any of them could be published.

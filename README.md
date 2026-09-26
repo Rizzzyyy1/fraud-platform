@@ -13,6 +13,7 @@ in a React console. A portfolio project; everything runs on one laptop at no cos
 [live activity](docs/screenshots/02-live-activity.png) ·
 [failure drill](docs/screenshots/11-drill-scoring-suppressed.png) ·
 [model and system health](docs/screenshots/07-health.png) ·
+[real-data offline benchmark](docs/screenshots/16-real-data-benchmark.png) ·
 [demo script](docs/DEMO_SCRIPT.md)</sub>
 
 ## What I engineered
@@ -281,3 +282,8 @@ process in Le Borgne et al., *Reproducible Machine Learning for Credit Card Frau
 Practical Handbook* (2022); it adapts that design and the example's parameter values, with
 attribution. What was consulted, what was adapted and what was written independently are listed
 in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Dependencies keep their own licenses.
+
+The real-data benchmark uses the ULB credit-card dataset (Worldline and ULB MLG; cite Dal
+Pozzolo et al., CIDM 2015). It is downloaded by the user and never redistributed here. Its
+source terms, and the licensing questions still open, are recorded in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

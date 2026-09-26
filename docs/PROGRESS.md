@@ -590,3 +590,12 @@ build (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126). Re
   held-out results). Validation threshold gave a lower-than-budgeted review rate; the random-split
   column is descriptive only. Imported into MLflow as a historical run and shown in the dashboard's
   historical results. No change to the platform or its results.
+* Source terms checked directly on 2026-09-26 (`THIRD_PARTY_NOTICES.md`). OpenML lists "Public",
+  which is not a licence. Kaggle lists ODbL v1.0 (database) and DbCL v1.0 (contents), but neither
+  source says those terms cover the OpenML copy used here, and the owners' pages returned 404.
+  Licensing is therefore recorded as unresolved, and row-level outputs stay unpublished.
+* Reproducibility rerun (`reports/external/ulb/reproduction.md`): the frozen protocol was rerun with
+  the original's selected configurations. All 41 recorded values matched exactly (max difference 0).
+  Saved models reload to identical scores. Two reruns produced byte-identical models and
+  predictions. The artifacts are local only, under git-ignored `artifacts/`. The rerun is logged
+  as a separate MLflow run that links to the imported run, which is unchanged.

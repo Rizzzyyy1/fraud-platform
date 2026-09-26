@@ -176,6 +176,15 @@ def claims() -> list[tuple[str, list[str], str]]:
             f"logistic regression {r(ulb['lr']['test']['average_precision'], 3)}",
         )
     )
+    rerun = load("reports/external/ulb/reproduction.json")["comparison"]
+    if rerun["all_within_tolerance"] and rerun["max_abs_diff"] == 0:
+        out.append(
+            (
+                "ULB reproducibility rerun (reproduction.json)",
+                [NOTES],
+                f"All {len(rerun['rows'])} recorded values matched exactly",
+            )
+        )
     return out
 
 

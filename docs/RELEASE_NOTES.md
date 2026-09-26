@@ -14,11 +14,20 @@ models, policies and results are unchanged.
   than its 0.5% budget on the test window. A stratified random split scored higher AP for both
   models; this is descriptive only (different training sizes and test populations).
 * **Data limits:** PCA was applied upstream by the data owner and its fitting scope cannot be
-  verified; label-arrival times are unavailable; licensing metadata is recorded per distributor in
-  `THIRD_PARTY_NOTICES.md`; raw data is not redistributed.
+  verified; label-arrival times are unavailable; raw data is not redistributed.
+* **Source terms checked at the source (2026-09-26), not declared complete:** OpenML's copy lists
+  "Public" (not a licence). Kaggle's listing states ODbL v1.0 (database) and DbCL v1.0
+  (contents). Neither source says whether those terms cover the OpenML copy. The owners' own
+  pages were unreachable. Open items are listed in `THIRD_PARTY_NOTICES.md`.
+* **Reproducibility rerun:** the frozen protocol was rerun with the original's selected
+  configurations (no search). All 41 recorded values matched exactly, and two reruns gave
+  byte-identical models and predictions. Those artifacts are saved locally and not published
+  (`reports/external/ulb/reproduction.md`). The rerun is logged as a separate MLflow run, linked
+  to the imported historical run.
 * **Experiment tracking and dashboard:** the completed run is imported into MLflow as a historical
   run, and the dashboard's historical results show a labelled "Real-data offline benchmark" entry.
-* Report: `reports/external/ulb/benchmark.md`; provenance: `THIRD_PARTY_NOTICES.md`.
+* Reports: `reports/external/ulb/benchmark.md`, `reproduction.md`; how to reproduce:
+  `docs/DATASET_CARD.md`; provenance: `THIRD_PARTY_NOTICES.md`.
 
 ---
 

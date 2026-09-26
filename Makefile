@@ -1,4 +1,4 @@
-.PHONY: env install up down migrate serve test test-integration lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down smoke docs-check ulb-fetch ulb-report
+.PHONY: env install up down migrate serve test test-integration lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down smoke docs-check ulb-fetch ulb-reproduce ulb-mlflow ulb-report
 
 env:            ## create .env from the example (local development only)
 	@test -f .env || cp .env.example .env
@@ -40,6 +40,12 @@ ulb-fetch:      ## download and verify the real ULB dataset (offline benchmark o
 
 ulb-report:     ## re-render the ULB benchmark report from its committed JSON (no recomputation)
 	uv run python -m fraudplat.external.report
+
+ulb-reproduce:  ## rerun the frozen ULB protocol; artifacts to git-ignored artifacts/ (reference kept)
+	uv run python -m fraudplat.external.reproduce
+
+ulb-mlflow:     ## record the ULB benchmark in MLflow as an imported historical run (idempotent)
+	set -a; . ./.env; set +a; uv run python -m fraudplat.external.mlflow_import
 
 docs-check:     ## documentation links and evidence consistency
 	uv run python scripts/check_doc_links.py

@@ -153,7 +153,7 @@ def historical_results() -> list[dict[str, Any]]:
                 "rows": [
                     {
                         "label": names[family],
-                        "identity": "offline fit, not saved: "
+                        "identity": "original fit, not saved: "
                         + ", ".join(f"{k}={val}" for k, val in v["selected"].items()),
                         "metrics": {
                             "validation_ap": v["validation_ap"],
@@ -172,7 +172,8 @@ def historical_results() -> list[dict[str, Any]]:
                     "from these held-out results. Features are PCA components computed upstream by "
                     "the data owner (fitting scope unverifiable); no customer or merchant IDs; "
                     "label-arrival times unavailable. AP here is not comparable with the synthetic "
-                    "results above."
+                    "results above. A later rerun of the frozen protocol reproduced these values "
+                    "exactly; its models and predictions are kept locally, not published."
                 ),
             }
         )

@@ -108,3 +108,15 @@ def test_reproduction_is_a_separate_run_linked_to_the_import(tmp_path: Path) -> 
     exp = client.get_experiment_by_name(EXPERIMENT)
     assert exp is not None
     assert not client.search_registered_models()
+
+
+def test_committed_rerun_summary_matches_its_json_and_the_unchanged_reference() -> None:
+    import hashlib
+
+    from fraudplat.external.reproduce import SUMMARY, render
+
+    summary = json.loads(SUMMARY.read_text())
+    assert SUMMARY.with_suffix(".md").read_text() == render(summary)
+    assert summary["reference"]["sha256"] == hashlib.sha256(REPORT.read_bytes()).hexdigest()
+    assert summary["environment"]["code_dirty"] is False
+    assert "predictions.parquet" in summary["local_artifacts"]  # listed, not committed

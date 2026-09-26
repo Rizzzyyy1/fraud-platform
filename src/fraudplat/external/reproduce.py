@@ -20,6 +20,10 @@ Everything is written to a git-ignored directory under `artifacts/` (default
 predictions and model files stay local until their publication suitability is checked. The
 reference report is read, never written; `--out` refuses any path under `reports/`. Differences
 from the reference are reported as measured, not reconciled.
+
+`--summarize DIR` writes the committed, aggregate-only record of a rerun:
+`reports/external/ulb/reproduction.json` (metrics, comparison, environment, file checksums; no
+row-level data) and `reproduction.md`, rendered from it.
 """
 
 from __future__ import annotations
@@ -301,11 +305,117 @@ def reproduce(out: Path) -> dict[str, Any]:
     return run
 
 
+SUMMARY = REFERENCE.with_name("reproduction.json")
+
+
+def summarize(run_dir: Path, imported_at: str | None) -> dict[str, Any]:
+    run: dict[str, Any] = json.loads((run_dir / "run.json").read_text())
+    manifest = json.loads((run_dir / "manifest.json").read_text())
+    return {
+        "rerun_id": run_dir.name,
+        "records": {
+            "original_benchmark": run["reference"]["created_at"],
+            "mlflow_import": imported_at,
+            "reproducibility_rerun": [run["started_at"], run["finished_at"]],
+        },
+        **{k: v for k, v in run.items() if k not in {"kind"}},
+        "local_artifacts": manifest["files"],
+    }
+
+
+def render(s: dict[str, Any]) -> str:
+    env, cmp, rec = s["environment"], s["comparison"], s["records"]
+    lines = [
+        "# ULB benchmark: reproducibility rerun",
+        "",
+        "Generated from `reproduction.json` by `python -m fraudplat.external.reproduce "
+        "--summarize`. The reference results (`benchmark.json`, `benchmark.md`) are unchanged.",
+        "",
+        "## Three records, kept apart",
+        "",
+        "| Record | When (UTC) | What it is |",
+        "|---|---|---|",
+        f"| Original benchmark | {rec['original_benchmark']} | The one pre-registered evaluation. "
+        "Metrics only; models and predictions were not saved. |",
+        f"| MLflow import | {rec['mlflow_import'] or 'not recorded'} | The original's committed "
+        "results recorded afterwards as an imported historical run (start time set to the "
+        "original evaluation). Nothing recomputed. |",
+        f"| Reproducibility rerun | {rec['reproducibility_rerun'][0]} to "
+        f"{rec['reproducibility_rerun'][1]} | Same protocol code, windows, seeds and the "
+        "original's selected configurations; no search, no new thresholds. Saves artifacts "
+        "locally. Logged as its own MLflow run linked to the import. |",
+        "",
+        "## Result",
+        "",
+        f"{len(cmp['rows'])} recorded values compared (validation AP, threshold, every test "
+        "metric and interval bound, random-split contrast, per family); maximum absolute "
+        f"difference {cmp['max_abs_diff']:.3g}; all within {cmp['tolerance']:g}: "
+        f"{'yes' if cmp['all_within_tolerance'] else 'no'}.",
+        "",
+        "| Family | Selected | Test AP reference | Test AP rerun | Threshold reference | "
+        "Threshold rerun |",
+        "|---|---|---|---|---|---|",
+    ]
+    by = {(r["family"], r["metric"]): r for r in cmp["rows"]}
+    for family, m in s["metrics"].items():
+        ap, th = by[(family, "test.average_precision")], by[(family, "threshold_from_validation")]
+        lines.append(
+            f"| {family} | {', '.join(f'{k}={v}' for k, v in m['selected'].items())} | "
+            f"{ap['reference']:.6f} | {ap['reproduced']:.6f} | {th['reference']:.6g} | "
+            f"{th['reproduced']:.6g} |"
+        )
+    if not cmp["all_within_tolerance"]:
+        lines += ["", "Differences:", ""]
+        lines += [
+            f"* {r['family']} {r['metric']}: {r['reference']} vs {r['reproduced']}"
+            for r in cmp["rows"]
+            if not r["within_tolerance"]
+        ]
+    parity = ", ".join(f"{f} {v:.3g}" for f, v in s["reload_parity_max_abs_diff"].items())
+    lines += [
+        "",
+        "Saved models reloaded from disk give the same test scores "
+        f"(max abs difference: {parity}).",
+        "",
+        "## Environment",
+        "",
+        f"* Dataset MD5 `{env['dataset_md5']}`; code revision `{env['code_revision'][:12]}` "
+        f"(uncommitted changes: {'yes' if env['code_dirty'] else 'no'}); protocol SHA-256 "
+        f"`{env['protocol_sha256'][:16]}…`; `uv.lock` SHA-256 `{str(env['uv_lock_sha256'])[:16]}…`",
+        f"* Python {env['python']}, {env['platform']} {env.get('machine', '')}; "
+        + ", ".join(f"{p} {v}" for p, v in env["packages"].items()),
+        "* The original run did not record its environment. `uv.lock` and the protocol code are "
+        "unchanged since the results commit; the exact match above is the evidence of parity.",
+        "",
+        "## Artifacts (local only, not published)",
+        "",
+        "Written to `artifacts/external/ulb/reproduction/<rerun id>/` (git-ignored). Row-level "
+        "predictions and model files stay local until their publication suitability is checked "
+        "(see `THIRD_PARTY_NOTICES.md`).",
+        "",
+        "| File | Bytes | SHA-256 |",
+        "|---|---|---|",
+    ]
+    lines += [
+        f"| `{name}` | {f['bytes']:,} | `{f['sha256']}` |"
+        for name, f in sorted(s["local_artifacts"].items())
+    ]
+    return "\n".join(lines) + "\n"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     parser.add_argument("--out", type=Path, default=ARTIFACTS / stamp)
+    parser.add_argument("--summarize", type=Path, help="write the committed summary of this rerun")
+    parser.add_argument("--imported-at", help="UTC time of the MLflow import, for the summary")
     args = parser.parse_args()
+    if args.summarize:
+        summary = summarize(args.summarize, args.imported_at)
+        write_json(SUMMARY, summary)
+        SUMMARY.with_suffix(".md").write_text(render(summary))
+        print(f"wrote {SUMMARY} and {SUMMARY.with_suffix('.md')}")
+        return 0
     run = reproduce(args.out)
     c = run["comparison"]
     print(

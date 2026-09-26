@@ -217,14 +217,14 @@ describe("health", () => {
       body: url === "/api/health" ? health() : {
         reports: [],
         release: null,
-        results: [{ key: "ulb_benchmark", title: "Real-data offline benchmark (ULB)", split: "external", split_detail: "held out: elapsed hours 32–48", source: "reports/external/ulb/benchmark.json", note: "These models do not power the live scoring service.", rows: [{ label: "XGBoost", identity: "offline fit, not saved: max_depth=3", metrics: { validation_ap: 0.828, average_precision: 0.746 } }] }],
+        results: [{ key: "ulb_benchmark", title: "Real-data offline benchmark (ULB)", split: "external", split_detail: "held out: elapsed hours 32–48", source: "reports/external/ulb/benchmark.json", note: "These models do not power the live scoring service.", rows: [{ label: "XGBoost", identity: "original fit, not saved: max_depth=3", metrics: { validation_ap: 0.828, average_precision: 0.746 } }] }],
       },
     }));
     render(<Health />);
     await screen.findByText("Real data · offline only · not deployed");
     expect(screen.getByText(/do not power the live scoring service/)).toBeInTheDocument();
     expect(screen.getByText("Validation AP")).toBeInTheDocument();
-    expect(screen.getByText("offline fit, not saved: max_depth=3")).toBeInTheDocument();
+    expect(screen.getByText("original fit, not saved: max_depth=3")).toBeInTheDocument();
   });
 });
 
