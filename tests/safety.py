@@ -9,25 +9,48 @@ only against an explicitly designated, disposable test target that is not the ap
   integration tests run on isolated services (`docker-compose.test.yml`).
 * Redis: database 15 only, on a server other than the application's (`FRAUD_REDIS_URL`).
 * Kafka: a bootstrap address other than the application's (`FRAUD_KAFKA_BOOTSTRAP`).
-* Outage tests: the container must be named explicitly (`FRAUD_TEST_REDIS_CONTAINER`) and must
-  publish Redis on the test Redis port, which must not be the application's port.
+* Outage tests: the container must be named explicitly (`FRAUD_TEST_REDIS_CONTAINER`), belong to
+  the disposable Compose project (`fraud-itest`, service `redis`), be running, and publish Redis
+  on the test Redis port, which must not be the application's port. Its immutable container ID is
+  recorded at that point, and the pause and the cleanup act on that exact ID only. Cleanup does not
+  re-derive ownership from `docker port`, which reports nothing for a paused container on some
+  Docker Engine versions.
 Every check raises `UnsafeTestTarget` before anything is changed.
+
+Cleanup runs in a `finally` clause, so it is attempted after assertion failures, exceptions and
+cancellation. It cannot run if the test process is killed (SIGKILL, a crashed interpreter, a lost
+machine). In that case the disposable Redis can be left paused; recover it with
+`make test-redis-recover`, which unpauses only a container that passes the same ownership checks
+(`python -m tests.safety recover-redis`).
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import json
+import os
+import subprocess
+import sys
+from collections.abc import Callable, Iterator, Sequence
+from contextlib import contextmanager
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 from urllib.parse import urlsplit
 
 from psycopg.conninfo import conninfo_to_dict
 
+TEST_COMPOSE_PROJECT = "fraud-itest"  # the Makefile's ITEST project; a unit test keeps them equal
+TEST_REDIS_SERVICE = "redis"
 RESERVED_DATABASES = frozenset({"fraud", "postgres", "mlflow", "template0", "template1"})
 _LOOPBACK = {"localhost", "127.0.0.1", "::1", ""}
 
 
 class UnsafeTestTarget(RuntimeError):
     pass
+
+
+class OutageCleanupError(RuntimeError):
+    """The disposable Redis could not be confirmed unpaused after a simulated outage."""
 
 
 @dataclass(frozen=True)
@@ -109,7 +132,193 @@ def assert_outage_container(
         raise UnsafeTestTarget(f"container {container!r} publishes the application's Redis port")
 
 
+Runner = Callable[[Sequence[str]], "subprocess.CompletedProcess[str]"]
+
+
+def docker(args: Sequence[str]) -> subprocess.CompletedProcess[str]:
+    """Run `docker <args>` with fixed arguments (no shell), capturing output."""
+    return subprocess.run(  # noqa: S603
+        ["docker", *args],  # noqa: S607
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+@dataclass(frozen=True)
+class OutageTarget:
+    """A container verified, while running, as the disposable test Redis."""
+
+    container_id: str  # immutable full ID; every later action uses this, never the name
+    name: str
+    project: str
+    test_port: int
+
+
+def _inspect(ref: str, run: Runner) -> dict[str, Any]:
+    found = run(["inspect", "--type", "container", ref])
+    if found.returncode != 0:
+        raise UnsafeTestTarget(f"cannot inspect container {ref!r}: {found.stderr.strip()}")
+    info: dict[str, Any] = json.loads(found.stdout)[0]
+    return info
+
+
+def _published(ports: dict[str, Any] | None) -> str:
+    """Docker's port map for 6379/tcp in `docker port` form ("host:port" per line)."""
+    bindings = (ports or {}).get("6379/tcp") or []
+    return "".join(f"{b.get('HostIp', '')}:{b.get('HostPort', '')}\n" for b in bindings)
+
+
+def _assert_owned(ref: str, info: dict[str, Any]) -> str:
+    labels = (info.get("Config") or {}).get("Labels") or {}
+    project = labels.get("com.docker.compose.project")
+    service = labels.get("com.docker.compose.service")
+    if project != TEST_COMPOSE_PROJECT or service != TEST_REDIS_SERVICE:
+        raise UnsafeTestTarget(
+            f"container {ref!r} is not the disposable test Redis (Compose project {project!r}, "
+            f"service {service!r}; expected {TEST_COMPOSE_PROJECT!r}, {TEST_REDIS_SERVICE!r})"
+        )
+    return str(project)
+
+
+def verify_outage_target(
+    container: str | None, test_redis_url: str, app_redis_url: str | None, run: Runner = docker
+) -> OutageTarget:
+    """Check the container before it is paused, and record its immutable ID."""
+    if not container:
+        raise UnsafeTestTarget("set FRAUD_TEST_REDIS_CONTAINER to the disposable test Redis")
+    info = _inspect(container, run)
+    project = _assert_owned(container, info)
+    state = info.get("State") or {}
+    if state.get("Paused") or state.get("Status") != "running":
+        raise UnsafeTestTarget(
+            f"container {container!r} is not running (status {state.get('Status')!r}, paused "
+            f"{state.get('Paused')!r}); if an earlier run was interrupted, run "
+            "`make test-redis-recover`"
+        )
+    live = _published((info.get("NetworkSettings") or {}).get("Ports"))
+    configured = _published((info.get("HostConfig") or {}).get("PortBindings"))
+    assert_outage_container(container, live, test_redis_url, app_redis_url)
+    assert_outage_container(container, configured, test_redis_url, app_redis_url)
+    return OutageTarget(
+        container_id=str(info["Id"]),
+        name=str(info.get("Name", "")).lstrip("/"),
+        project=project,
+        test_port=redis_target(test_redis_url)[0].port,
+    )
+
+
+def _confirm_identity(target: OutageTarget, run: Runner) -> dict[str, Any]:
+    """Re-inspect by the recorded ID (not the name) and re-check ownership labels."""
+    info = _inspect(target.container_id, run)
+    if info.get("Id") != target.container_id:
+        raise UnsafeTestTarget(f"container ID changed: expected {target.container_id}")
+    _assert_owned(target.container_id, info)
+    return info
+
+
+def restore(target: OutageTarget, run: Runner = docker) -> None:
+    """Unpause the recorded container and confirm it; raise OutageCleanupError otherwise."""
+    short = target.container_id[:12]
+    try:
+        if not (_confirm_identity(target, run).get("State") or {}).get("Paused"):
+            return
+        result = run(["unpause", target.container_id])
+        if result.returncode != 0:
+            raise OutageCleanupError(
+                f"docker unpause {short} ({target.name}) failed: {result.stderr.strip()}"
+            )
+        if (_confirm_identity(target, run).get("State") or {}).get("Paused"):
+            raise OutageCleanupError(f"container {short} ({target.name}) is still paused")
+    except UnsafeTestTarget as refused:
+        raise OutageCleanupError(f"cleanup of {short} refused: {refused}") from refused
+    except OutageCleanupError as failed:
+        raise OutageCleanupError(
+            f"{failed}. The disposable test Redis may still be paused; recover it with "
+            "`make test-redis-recover`."
+        ) from failed
+
+
+@contextmanager
+def redis_outage(target: OutageTarget, run: Runner = docker) -> Iterator[None]:
+    """Pause the verified test Redis for the duration of the block.
+
+    Cleanup is attempted in `finally` whatever happens inside the block. If the block failed and
+    cleanup also fails, the original exception propagates with the cleanup failure attached as a
+    note (and printed to stderr); if only cleanup fails, `OutageCleanupError` is raised.
+    """
+    _confirm_identity(target, run)  # still the verified container; refuse before pausing
+    pending: BaseException | None = None
+    try:
+        paused = run(["pause", target.container_id])
+        if paused.returncode != 0:
+            raise RuntimeError(f"docker pause {target.container_id[:12]} failed: {paused.stderr}")
+        yield
+    except BaseException as exc:
+        pending = exc
+        raise
+    finally:
+        try:
+            restore(target, run)
+        except OutageCleanupError as cleanup:
+            if pending is None:
+                raise
+            message = f"Redis outage cleanup also failed: {cleanup}"
+            pending.add_note(message)
+            print(message, file=sys.stderr)
+
+
+def recover_redis(
+    container: str | None, test_redis_url: str, app_redis_url: str | None, run: Runner = docker
+) -> str:
+    """Unpause a disposable test Redis left paused by an interrupted run (owned containers only).
+
+    Ownership is checked on the Compose labels and the configured port bindings, which Docker
+    keeps while a container is paused (the live port map may be empty then).
+    """
+    if not container:
+        raise UnsafeTestTarget("no disposable test Redis container found")
+    info = _inspect(container, run)
+    project = _assert_owned(container, info)
+    configured = _published((info.get("HostConfig") or {}).get("PortBindings"))
+    assert_outage_container(container, configured, test_redis_url, app_redis_url)
+    target = OutageTarget(
+        str(info["Id"]), str(info.get("Name", "")).lstrip("/"), project,
+        redis_target(test_redis_url)[0].port,
+    )  # fmt: skip
+    was_paused = bool((info.get("State") or {}).get("Paused"))
+    restore(target, run)
+    outcome = "unpaused" if was_paused else "was not paused"
+    return f"{target.name} ({target.container_id[:12]}): {outcome}"
+
+
+def _app_setting(name: str) -> str | None:
+    value = os.environ.get(name)
+    env_file = Path(".env")
+    if value is None and env_file.exists():
+        for line in env_file.read_text().splitlines():
+            if line.startswith(f"{name}="):
+                value = line.split("=", 1)[1].strip()
+    return value or None
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args != ["recover-redis"]:
+        print("usage: python -m tests.safety recover-redis", file=sys.stderr)
+        return 2
+    test_url = os.environ.get("FRAUD_TEST_REDIS_URL", "redis://127.0.0.1:6480/15")
+    assert_disposable_redis(test_url, _app_setting("FRAUD_REDIS_URL"))
+    container = os.environ.get("FRAUD_TEST_REDIS_CONTAINER")
+    print(recover_redis(container, test_url, _app_setting("FRAUD_REDIS_URL")))
+    return 0
+
+
 def reset_database(test_url: str, app_url: str | None, reset: Callable[[str], None]) -> None:
     """Run `reset` (downgrade + upgrade) only after the target passed the guard."""
     assert_disposable_database(test_url, app_url)
     reset(test_url)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -10,7 +10,6 @@ import asyncio
 import json
 import os
 import random
-import subprocess
 import time
 import uuid
 from collections.abc import AsyncIterator, Iterator, Sequence
@@ -36,7 +35,7 @@ from fraudplat.pipeline.streams import Stream
 from fraudplat.pipeline.topics import delete_consumer_group, delete_topics, ensure_topics
 from fraudplat.pipeline.worker import FeatureStoreUnavailable, FeatureWorker
 
-from ..safety import assert_outage_container
+from ..safety import OutageTarget, redis_outage, verify_outage_target
 from .conftest import (
     API_KEY,
     _optional_setting,
@@ -351,33 +350,19 @@ async def test_worker_crash_after_redis_update_before_commit(
         assert compute_features(snapshot=red, **kwargs) == compute_features(snapshot=mem, **kwargs)
 
 
-def _redis_container() -> str:
-    """The disposable test Redis container, named explicitly and checked before it is paused."""
-    name = os.environ.get("FRAUD_TEST_REDIS_CONTAINER")
-    published = ""
-    if name:
-        found = subprocess.run(  # noqa: S603
-            ["docker", "port", name, "6379/tcp"],  # noqa: S607
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        published = found.stdout
-    assert_outage_container(name, published, redis_test_url(), _optional_setting("FRAUD_REDIS_URL"))
-    assert name is not None
-    return name
-
-
-def _docker(action: str) -> None:
-    """Pause/unpause the Redis container to simulate an outage (fixed arguments, local only)."""
-    subprocess.run(  # noqa: S603
-        ["docker", action, _redis_container()],  # noqa: S607
-        check=True,
-        capture_output=True,
+@pytest.fixture
+def outage_target() -> OutageTarget:
+    """The disposable test Redis, verified while running; its container ID is recorded."""
+    return verify_outage_target(
+        os.environ.get("FRAUD_TEST_REDIS_CONTAINER"),
+        redis_test_url(),
+        _optional_setting("FRAUD_REDIS_URL"),
     )
 
 
-async def test_redis_outage_within_retry_budget_recovers(stream: Stream, bootstrap: str) -> None:
+async def test_redis_outage_within_retry_budget_recovers(
+    stream: Stream, bootstrap: str, outage_target: OutageTarget
+) -> None:
     redis = Redis.from_url(
         redis_test_url(),
         decode_responses=True,
@@ -391,12 +376,9 @@ async def test_redis_outage_within_retry_budget_recovers(stream: Stream, bootstr
         [valid(payload(f"r{i}", when=BASE + timedelta(minutes=i))) for i in range(5)],
     )
     worker = make_worker(bootstrap, stream, redis, max_attempts=12, base_backoff_s=0.2)
-    _docker("pause")
-    try:
+    with redis_outage(outage_target):
         task = asyncio.create_task(drain(worker, idle_s=2.0))
         await asyncio.sleep(3)
-    finally:
-        _docker("unpause")
     await task
     worker.close()
     assert worker.counts.by_outcome == {"applied": 5}
@@ -405,7 +387,7 @@ async def test_redis_outage_within_retry_budget_recovers(stream: Stream, bootstr
 
 
 async def test_redis_outage_beyond_budget_stops_without_commit(
-    stream: Stream, bootstrap: str
+    stream: Stream, bootstrap: str, outage_target: OutageTarget
 ) -> None:
     redis = Redis.from_url(
         redis_test_url(),
@@ -420,12 +402,8 @@ async def test_redis_outage_beyond_budget_stops_without_commit(
         [valid(payload(f"b{i}", when=BASE + timedelta(minutes=i))) for i in range(4)],
     )
     worker = make_worker(bootstrap, stream, redis, max_attempts=2, base_backoff_s=0.1)
-    _docker("pause")
-    try:
-        with pytest.raises(FeatureStoreUnavailable):
-            await drain(worker)
-    finally:
-        _docker("unpause")
+    with redis_outage(outage_target), pytest.raises(FeatureStoreUnavailable):
+        await drain(worker)
     worker.close()
     # Nothing was committed, so a restarted worker applies each of the four once.
     restarted = make_worker(bootstrap, stream, redis)

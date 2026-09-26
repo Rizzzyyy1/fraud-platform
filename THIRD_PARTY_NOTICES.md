@@ -82,22 +82,23 @@ in `reports/external/ulb/source_comparison.md`. The data used is therefore the d
 licenses on Kaggle under ODbL/DbCL. The original benchmark's recorded provenance remains OpenML
 1597 v1 (`benchmark.json` is unchanged).
 
-**Which licence conditions apply, and to what.** DbCL §2.2 requires compliance with the ODbL, so
-the conditions below are the ODbL's:
+**ODbL terms relevant to what this project publishes.** DbCL §2.2 says "You must comply with the
+ODbL", so the terms below are ODbL v1.0 sections. The right-hand column records the approach the
+project takes. It is the project's reading of the licence text, not legal advice and not a
+determination of compliance.
 
-| What this project does | ODbL term | Applies? | How it is met |
+| Item | Publication scope | Relevant ODbL text | Approach taken |
 |---|---|---|---|
-| Raw data | §4.2 notices (on Publicly Conveying the Database or a Derivative Database) | No: the data is not conveyed. Users download it themselves from the source. | Not redistributed; `data/` is git-ignored. |
-| Committed aggregate reports (`reports/external/ulb/*`), the dashboard entry and its screenshot, and the README figures | These are **Produced Works** (works resulting from using the whole of the Contents). §4.3 requires a notice when a Produced Work is Publicly Used. | Yes | The §4.3 notice below is given here, in `reports/external/ulb/NOTICE.md`, in the reproduction and comparison reports, in the dashboard entry and in the README. |
-| Local derived tables: time windows, and per-transaction scores joined to labels | These are **Derivative Databases**. Publicly using a Produced Work made from one counts as publicly using it (§4.4c), which brings in share-alike (§4.4a) and access (§4.6). | Yes, because the aggregate metrics are computed from them | §4.6 is met by option (b): the method of making the alterations is published free of charge as the committed code (`src/fraudplat/external/benchmark.py`, `reproduce.py`, `ulb.py`). If the derived tables themselves are ever released, they must be released under the ODbL (§4.4a). They are not released. |
-| Fitted model files (local only) | Not addressed by the ODbL's definitions. It is unclear whether trained parameters are a Produced Work (notice only) or a Derivative Database (share-alike). | Unresolved; no current effect | They are not published. Deciding needs a legal reading of that classification, which has not been obtained. |
+| Raw data | Not published. Users download it from the source; `data/` is git-ignored. | §4.2 sets notice conditions for Publicly Conveying the Database or a Derivative Database. | The data is not conveyed by this project. |
+| Aggregate reports (`reports/external/ulb/*`), the dashboard entry and its screenshot, README figures | Published | "Produced Work" is defined as a work resulting from using the whole or a Substantial part of the Contents. §4.3 asks for a notice when a Produced Work is Publicly Used, and gives example wording. | Treated as Produced Works. The §4.3 example notice (below) is placed in this file, `reports/external/ulb/NOTICE.md`, the reproduction and comparison reports, the dashboard entry and the README. |
+| Derived tables: time windows, and per-transaction scores joined to labels | Kept local, not published | "Derivative Database" includes extractions and modifications of the Contents. §4.4c treats a Derivative Database as Publicly Used when a Produced Work created from it is Publicly Used. §4.4a sets share-alike for Derivative Databases. §4.6 asks for an offer of the Derivative Database or "a file containing … the method of making the alterations … (such as an algorithm)". | The code that makes these tables is published free of charge (`src/fraudplat/external/ulb.py`, `benchmark.py`, `reproduce.py`), in line with §4.6(b). The tables are not released. |
+| Fitted model files | Kept local, not published | The ODbL definitions do not name trained model parameters. | Not classified. Whether they would be treated as a Produced Work or a Derivative Database has not been determined. |
 
 **§4.3 notice.** Contains information from [Credit Card Fraud
 Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud), which is made available here
 under the [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/1-0/).
 
-**Residual evidence gap (not blocking the publication recommended here).** The licence grant rests
-on Kaggle's owner account `mlg-ulb`. No document was obtained showing that this account is
-controlled by ULB MLG, or that Worldline, as co-collector, agreed to the licence. These are the
-only rights facts not verified directly. They would matter before any release of the data, the
-derived tables or the models, and none of those is released.
+**Rights facts not verified directly.** The licence shown on Kaggle is stated by the owner account
+`mlg-ulb` ("Machine Learning Group - ULB"). No document was obtained that confirms who controls
+that account, or that sets out Worldline's position as co-collector of the data. The project
+relies on the licence as the owner-listed source states it, and records this gap.

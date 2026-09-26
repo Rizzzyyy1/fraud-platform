@@ -594,8 +594,19 @@ build (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126). Re
   database, DbCL v1.0 for the contents) is identical to the OpenML 1597 v1 copy the benchmark used.
   The comparison covered columns, 284,807 rows in order, and 8,829,017 cells as text and as parsed
   numbers (`reports/external/ulb/source_comparison.md`). `make ulb-fetch` now uses Kaggle. The
-  benchmark's recorded provenance stays OpenML. The applicable ODbL conditions (§4.3 notice, and
-  §4.6 met by publishing the derivation code) are mapped in `THIRD_PARTY_NOTICES.md`.
+  benchmark's recorded provenance stays OpenML. `THIRD_PARTY_NOTICES.md` lists the ODbL sections
+  relevant to what is published and the approach taken: the §4.3 example notice on published
+  results, and the derivation code published in line with §4.6(b). The derived tables and models
+  stay local.
+* Redis-outage test fix: on Docker Engine 29.8.0, `docker port` reports nothing for a paused
+  container. The old helper re-checked ownership that way before unpausing, so it refused to
+  unpause and left the test Redis paused, and later integration tests failed. The helper now
+  verifies the container while it is running (Compose project and service labels, running state,
+  test port and not the application's), records its immutable ID, and pauses and cleans up by
+  that ID in a `finally` clause. A cleanup failure is attached to the test's original failure
+  rather than replacing it. Regression tests use a fake Docker that reproduces the engine
+  behaviour. `make test-redis-recover` unpauses only a verified test container after a killed
+  run, which no `finally` clause can handle.
 * Reproducibility rerun (`reports/external/ulb/reproduction.md`): the frozen protocol was rerun with
   the original's selected configurations. All 41 recorded values matched exactly (max difference 0)
   in the recorded rerun environment; the original run's environment was not recorded.

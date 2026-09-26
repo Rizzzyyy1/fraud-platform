@@ -29,6 +29,12 @@ models, policies and results are unchanged.
   to the imported historical run.
 * **Experiment tracking and dashboard:** the completed run is imported into MLflow as a historical
   run, and the dashboard's historical results show a labelled "Real-data offline benchmark" entry.
+* **Integration-test harness:** the Redis-outage tests now verify the disposable Redis container
+  while it is running and record its immutable ID. They pause it and clean up by that ID in a
+  `finally` clause, without re-checking ownership through `docker port`, which reports nothing
+  for a paused container on Docker Engine 29.8.0. Cleanup failures are attached to the original
+  test failure. `make test-redis-recover` unpauses only the verified test container after an
+  interrupted run.
 * Reports: `reports/external/ulb/benchmark.md`, `reproduction.md`; how to reproduce:
   `docs/DATASET_CARD.md`; provenance: `THIRD_PARTY_NOTICES.md`.
 
