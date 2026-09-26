@@ -1,4 +1,4 @@
-.PHONY: env install up down migrate serve test test-integration lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down
+.PHONY: env install up down migrate serve test test-integration lint typecheck check data verify-data demo-b data-v2 verify-data-v2 bench-data train demo-c topics demo-pipeline bench-e2e mlflow compare demo-registry setup dashboard dashboard-reset dashboard-build dashboard-user dashboard-test test-services-down smoke docs-check
 
 env:            ## create .env from the example (local development only)
 	@test -f .env || cp .env.example .env
@@ -30,6 +30,14 @@ test-integration: ## integration tests on disposable isolated services (never th
 	$(ITEST_ENV) FRAUD_TEST_REDIS_CONTAINER=$$($(ITEST) ps -q redis) \
 	  uv run python scripts/wait_for_services.py --timeout 180
 	$(ITEST_ENV) FRAUD_TEST_REDIS_CONTAINER=$$($(ITEST) ps -q redis) uv run pytest -m integration
+
+smoke:          ## browser smoke test: real console + built dashboard on a seeded disposable database (no streaming)
+	$(ITEST) up -d --wait postgres
+	uv run python scripts/browser_smoke.py --admin-url postgresql://fraud:itest-only@127.0.0.1:5543/postgres
+
+docs-check:     ## documentation links and evidence consistency
+	uv run python scripts/check_doc_links.py
+	uv run python scripts/check_evidence.py
 
 test-services-down: ## stop and discard the disposable integration-test services
 	$(ITEST) down

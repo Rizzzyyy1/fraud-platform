@@ -571,3 +571,13 @@ job-level `env`); after moving it to step `env`, GitHub Actions passed: 167 unit
 integration tests on PostgreSQL, Redis and Kafka services, 14 dashboard tests and the production
 build (https://github.com/Rizzzyyy1/fraud-platform/actions/runs/36205313126). Release: https://github.com/Rizzzyyy1/fraud-platform/releases/tag/v1.0.0 (demo video attached).
 
+
+## v1.0.1 maintenance
+
+* Current summaries reconciled with the committed evidence (drill 156 of 750; dashboard response
+  means 6.7–62.1 ms; repeatability 2,221; calibration scoped to the comparison-stage models, not
+  the deployed artifact); `scripts/check_evidence.py` enforces this in CI. Entries above are
+  historical and describe the runs current at the time.
+* Browser smoke test added to CI (real console and dashboard build, seeded disposable database;
+  not the streaming system). The failure drill remains in the full local walkthrough.
+* This public repository is the source of truth for future public development (`PROVENANCE.md`).

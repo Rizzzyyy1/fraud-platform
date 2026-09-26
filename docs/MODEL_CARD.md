@@ -79,8 +79,10 @@ Source of every number: `reports/training/lr-f1-6f0ebad8fcc7/report.json`, produ
 Logistic regression (scikit-learn, lbfgs) on the 15 features of version f1 plus 4 missing-value
 indicators, after median imputation, log1p on skewed non-negative features and standardisation,
 all fitted on training rows only. Stored as an integrity-checked JSON artifact (ADR 0005). The
-output is used as a ranking score; **calibration has not been evaluated**, so it is not presented
-as a probability.
+output is used as a ranking score. **This artifact's calibration has not been evaluated**, so it is
+not presented as a probability. (The comparison-stage models were checked on development folds —
+raw ECE: logistic regression 0.0028–0.0034, XGBoost 0.0015–0.0027; Platt scaling did not
+consistently improve it — but those are different fits of the same families.)
 
 ### Data and timeline (ADR 0006)
 
@@ -187,9 +189,9 @@ Scenario AP against legitimate rows (population = that scenario's fraud + all le
   missing terminal fraud-history features is a hypothesis, not a tested cause.
 * On the latest fold the fixed decline threshold reached precision 0.857, below the 0.90
   it was derived to meet on the calibration window; logistic regression reached 0.904.
-* Calibration: mean raw score is close to the fraud rate in each window (ECE
-  0.0015–0.0027); Platt scaling fitted on the calibration window did not
-  improve it consistently. Scores remain **risk scores**; no probability claim is made.
+* Calibration: mean raw score is close to the fraud rate in each window (raw ECE: logistic
+  regression 0.0028–0.0034, XGBoost 0.0015–0.0027); Platt scaling fitted on the calibration window
+  did not improve it consistently. Scores remain **risk scores**; no probability claim is made.
 * Serving: artifact 604,428 B vs 4,258 B; single-row in-process
   inference p50 / p99 56 / 376 µs vs 20 / 24 µs. End-to-end API latency
   with XGBoost has not been benchmarked.

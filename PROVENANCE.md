@@ -32,3 +32,10 @@ be checked from this copy. The cited commits are:
 Everything under `releases/` is byte-identical to the private repository (checked when this copy
 was built), so integrity hashes and identities such as `lr-f1-6f0ebad8fcc7`,
 `pol-6164cb21826d` and the release-1 manifest verify unchanged.
+
+## Where development continues
+
+This public repository is the source of truth from v1.0.1 onward: make public changes here, on
+branches of this checkout, and open them as pull requests. The private development repository is
+kept private and is not merged into this history.
+
